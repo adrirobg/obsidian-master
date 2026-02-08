@@ -73,7 +73,7 @@ BrainOS/
 │   └── CANONICAL-CONTRADICTIONS-MAP.md
 │
 ├── 📁 10-Technical-Architecture/   ← Implementación técnica
-│   ├── TECHNICAL-REALTIME.md       ← Referencia aspiracional (post-MVP)
+│   ├── TECHNICAL-REALTIME.md       ← Realtime MVP (HTTP+SSE)
 │   └── 01-Core-Architecture/
 │       ├── ADR-001-Communication-Protocol.md
 │       ├── ADR-002-Embedding-Strategy.md
