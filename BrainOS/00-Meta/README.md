@@ -6,7 +6,7 @@ BrainOS es un **sistema agregador de PKM (Personal Knowledge Management)** que f
 
 1. **Gestión Zettelkasten Inteligente**: Automatización del flujo completo (fleeting → literature → permanent)
 2. **Potenciador Cognitivo**: Deep research, debate multi-agente, desarrollo de ideas
-3. **Segundo Cerebro Vivo**: Offloading inteligente de información con memoria persistente
+3. **Segundo Cerebro Vivo**: Offloading inteligente con memoria operativa en MVP y evolución de persistencia post-MVP
 
 ## Principios Fundamentales
 
@@ -43,19 +43,25 @@ BrainOS/
 
 ## Estado Actual
 
-🟡 **Fase de Diseño y Planificación**
+🟡 **Fase de consolidación canónica v0.1**
 
-- [ ] Arquitectura técnica detallada
-- [ ] Diseño del sistema multi-agente
-- [ ] Definición de interfaces y contratos
-- [ ] Prototipo de componentes críticos
+- [x] Decisiones técnicas MVP cerradas (ADR-001, ADR-003)
+- [x] Baseline metodológico validado para ciclo de 2-3 semanas
+- [ ] Implementación PoC HTTP+SSE
+- [ ] Validación de alcance real para post-MVP
+
+## Fuentes Canónicas v0.1
+
+- `BrainOS/00-Meta/CANONICAL-SOURCE-OF-TRUTH-v0.1.md`
+- `BrainOS/00-Meta/CANONICAL-CONTRADICTIONS-MAP.md`
+- `BrainOS/20-Methodology-System/METHODOLOGY-VALIDATION-PLAYBOOK.md`
 
 ## Sesiones Paralelas Activas
 
 ### Rama Técnica (Infraestructura)
-- MCP vs HTTP vs WebSockets
-- Estrategia de embeddings
-- Storage y persistencia
+- Implementación de integración HTTP+SSE (MVP)
+- Estrategia de embeddings (fuera del critical path MVP)
+- Límites de estado in-memory y contrato de sesión
 - Seguridad y autenticación
 
 ### Rama Metodológica (Sistema)
@@ -66,17 +72,15 @@ BrainOS/
 
 ## Decisiones Pendientes (ADRs)
 
-1. **ADR-001**: Protocolo de comunicación (MCP vs gRPC vs REST)
-2. **ADR-002**: Arquitectura de embeddings (cuándo activar)
-3. **ADR-003**: Modelo de persistencia de memoria agente
-4. **ADR-004**: Estrategia de orquestación multi-agente
-5. **ADR-005**: Estrategia de deployment (monolito vs microservicios)
+1. **ADR-002**: Arquitectura de embeddings (cuándo activar y bajo qué umbral)
+2. **ADR-004**: Estrategia de orquestación multi-agente
+3. **ADR-005**: Estrategia de deployment (monolito vs microservicios)
 
 ## Roadmap Tentativo
 
 ### Fase 0: Fundamentos (Ahora)
-- [ ] Decisiones arquitectónicas documentadas
-- [ ] Proof of Concept de componentes críticos
+- [x] Decisiones arquitectónicas MVP documentadas
+- [ ] Proof of Concept del flujo base (HTTP + SSE + sugerencias)
 - [ ] Definición de interfaces
 
 ### Fase 1: Core Functionality
@@ -104,4 +108,4 @@ BrainOS/
 Este proyecto está siendo desarrollado con un enfoque ** deliberado y pausado**. No hay prisa. La calidad arquitectónica y la coherencia del sistema son prioritarias sobre la velocidad de implementación.
 
 **Fecha de inicio**: 2026-02-07
-**Última actualización**: 2026-02-07
+**Última actualización**: 2026-02-08
