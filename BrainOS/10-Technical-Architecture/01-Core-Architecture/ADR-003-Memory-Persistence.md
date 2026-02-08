@@ -1,330 +1,247 @@
-# ADR-003: Persistencia de Memoria del Sistema
+# ADR-003: Persistencia de Estado - Simplificación para MVP
 
 ## Estado
-**PENDIENTE DE DECISIÓN**
+**DECIDIDO - In-memory primero, persistencia simple post-MVP**
 
-Fecha: 2026-02-07
-Autor: BrainOS Technical Team
+Fecha: 2026-02-08  
+Autor: BrainOS Technical Team  
+Última actualización: Post-peer-review simplificación
 
 ## Contexto
 
-BrainOS es un sistema multi-agente que necesita "recordar":
-- Interacciones previas con el usuario
-- Preferencias aprendidas (qué sugerencias acepta/rechaza)
-- Estado de sesiones de trabajo
-- Relaciones semánticas entre notas
-- Historial de operaciones
+BrainOS necesita manejar estado durante las sesiones de trabajo. Después del peer review, se determinó que **los flujos de trabajo son más importantes que la persistencia compleja** para el MVP.
 
-**No es memoria del LLM** (eso es efímera), es **memoria del sistema**.
+## Decisión
 
-## Tipos de Memoria Requerida
+**Para MVP: In-memory únicamente. Sin persistencia durable.**
 
-### 1. Memoria de Trabajo (Working Memory)
-- Sesión actual de chat/investigación
-- Contexto de nota activa
-- Conversación multi-turn
+**Post-MVP: Considerar JSON simple o SQLite si es necesario.**
 
-**Requisitos**: Rápida, temporal, se pierde al cerrar
+### Justificación
 
-### 2. Memoria a Corto Plazo (Short-term)
-- Preferencias de la sesión
-- Sugerencias recientes
-- Feedback del usuario
+1. **Prioridad en flujos**: El valor de BrainOS está en los flujos de captura-procesamiento-organización, no en persistencia sofisticada
 
-**Requisitos**: Persiste horas/días, ligera
+2. **Simplicidad**: Sin base de datos = menos código, menos bugs, más rápido de desarrollar
 
-### 3. Memoria a Largo Plazo (Long-term)
-- Patrones de comportamiento del usuario
-- Historial de aceptación/rechazo
-- Relaciones entre notas
-- "Conocimiento" del sistema sobre el vault
+3. **OpenCode maneja su propio estado**: Las sesiones y contexto del LLM viven en OpenCode, no necesitamos duplicarlo
 
-**Requisitos**: Persiste indefinidamente, estructurada
+4. **Obsidian ya persiste las notas**: El vault de Obsidian ES la persistencia. BrainOS solo necesita estado transitorio durante procesamiento.
 
-### 4. Memoria de Grafo (Graph Memory)
-- Relaciones entre notas
-- Clusters temáticos
-- Evolución del conocimiento
+5. **YAGNI**: No sabemos qué tipo de persistencia necesitaremos hasta tener flujos funcionando
 
-**Requisitos**: Query compleja, análisis de redes
+## Qué NO persistimos en MVP
 
-## Opciones de Implementación
+❌ Historial de conversaciones largo plazo  
+❌ Preferencias aprendidas del usuario  
+❌ Relaciones semánticas entre notas  
+❌ Estado de agentes entre sesiones  
+❌ Métricas de uso  
 
-### Opción A: SQLite + JSON Files
+## Qué SÍ mantenemos (in-memory)
 
-**Descripción**: SQLite para datos estructurados, JSON para config y caché.
+✅ **Sesión actual**: Contexto de la conversación activa  
+✅ **Sugerencias pendientes**: Para mostrar en UI  
+✅ **Estado de procesamiento**: Qué nota se está procesando ahora  
+✅ **Configuración**: Settings del plugin (en data.json de Obsidian)
 
-**Estructura**:
-```
-.brainos/
-├── brainos.db          # SQLite - memoria estructurada
-├── cache/              # JSON files temporales
-│   ├── session.json
-│   └── suggestions.json
-└── config.json         # Configuración
-```
-
-**Pros**:
-- ✅ Simple, sin dependencias externas
-- ✅ SQLite está en todas partes
-- ✅ JSON human-readable para debugging
-
-**Contras**:
-- ❌ Sin soporte nativo de grafo
-- ❌ Queries complejas de relaciones son difíciles
-- ❌ No escala bien para análisis de grafos
-
----
-
-### Opción B: SQLite + Graph DB Ligero
-
-**Descripción**: SQLite para datos, KuzuDB o similar para relaciones.
-
-**Estructura**:
-```
-.brainos/
-├── brainos.db          # SQLite - sesiones, preferencias
-├── knowledge_graph.db  # KuzuDB - relaciones entre notas
-└── config.json
-```
-
-**Pros**:
-- ✅ Grafo nativo para relaciones
-- ✅ Consultas tipo Cypher
-- ✅ Análisis de clusters y centralidad
-
-**Contras**:
-- ❌ Dependencia adicional
-- ❌ Más complejidad
-- ❌ Sync entre dos bases
-
----
-
-### Opción C: Única Base de Datos (PostgreSQL)
-
-**Descripción**: PostgreSQL con pgvector para embeddings y AGE para grafos.
-
-**Pros**:
-- ✅ Todo en uno
-- ✅ pgvector para embeddings
-- ✅ PostgreSQL AGE para grafos
-- ✅ Escalable
-
-**Contras**:
-- ❌ Requiere servidor PostgreSQL
-- ❌ Overkill para uso personal
-- ❌ No portable
-
----
-
-### Opción D: File-based con Indexación
-
-**Descripción**: Todo en archivos markdown/json, indexados bajo demanda.
-
-**Estructura**:
-```
-.brainos/
-├── sessions/           # Una carpeta por sesión
-│   ├── 2026-02-07-chat-abc/
-│   │   ├── context.json
-│   │   └── messages.json
-├── memory/             # Memoria a largo plazo
-│   ├── preferences.json
-│   ├── patterns.json
-│   └── feedback/
-└── graph/              # Relaciones
-    ├── nodes.json
-    └── edges.json
-```
-
-**Pros**:
-- ✅ Human-readable
-- ✅ Versionable con git
-- ✅ Sin dependencias
-- ✅ Transparente
-
-**Contras**:
-- ❌ Performance pobre con grandes volúmenes
-- ❌ Queries complejas son lentas
-- ❌ Race conditions posibles
-
----
-
-### Opción E: DuckDB (Híbrida)
-
-**Descripción**: DuckDB embebido - SQL analítico sin servidor.
-
-**Pros**:
-- ✅ Embebido, sin servidor
-- ✅ Rápido para análisis
-- ✅ Soporte parquet (eficiente)
-- ✅ Creciente ecosistema
-
-**Contras**:
-- ❌ Sin soporte nativo de grafo
-- ❌ Menos maduro que SQLite
-- ❌ Menos familiar para desarrolladores
-
-## Comparativa
-
-| Criterio | SQLite+JSON | SQLite+Graph | PostgreSQL | File-based | DuckDB |
-|----------|-------------|--------------|------------|------------|--------|
-| **Simplicidad** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Queries complejas** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
-| **Grafo nativo** | ❌ | ✅ | ✅ (con ext) | ❌ | ❌ |
-| **Portabilidad** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Performance** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Escalabilidad** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
-| **Debuggability** | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-
-## Recomendación Preliminar
-
-**Opción A: SQLite + JSON Files** (con path hacia B en el futuro)
-
-### Justificación:
-
-1. **Simplicidad primero**: Empezamos simple, evitamos over-engineering
-2. **Grafo en SQLite**: Se puede modelar grafo en tablas relacionales (más trabajo pero posible)
-3. **Evolución**: Si necesitamos grafo complejo, migrar a SQLite+KuzuDB es viable
-4. **Debugging**: JSON files son excelentes para desarrollo y testing
-
-### Esquema de Base de Datos Tentativo
-
-```sql
--- Sesiones de trabajo
-CREATE TABLE sessions (
-    id TEXT PRIMARY KEY,
-    type TEXT, -- 'chat', 'research', 'organization'
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    context TEXT, -- JSON: nota activa, filtros, etc.
-    status TEXT -- 'active', 'closed', 'archived'
-);
-
--- Mensajes/interacciones
-CREATE TABLE messages (
-    id TEXT PRIMARY KEY,
-    session_id TEXT,
-    role TEXT, -- 'user', 'agent', 'system'
-    content TEXT,
-    metadata TEXT, -- JSON: agent_id, tokens, etc.
-    timestamp TIMESTAMP,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
-);
-
--- Preferencias aprendidas
-CREATE TABLE preferences (
-    key TEXT PRIMARY KEY,
-    value TEXT,
-    category TEXT, -- 'organization', 'suggestions', 'ui'
-    learned_at TIMESTAMP,
-    confidence REAL -- 0-1, qué tan seguros estamos
-);
-
--- Feedback del usuario
-CREATE TABLE feedback (
-    id TEXT PRIMARY KEY,
-    suggestion_id TEXT,
-    action TEXT, -- 'accepted', 'rejected', 'modified'
-    original TEXT,
-    modified TEXT, -- si aplica
-    timestamp TIMESTAMP
-);
-
--- Grafo de notas (modelo relacional)
-CREATE TABLE note_nodes (
-    id TEXT PRIMARY KEY,
-    path TEXT UNIQUE,
-    title TEXT,
-    content_hash TEXT, -- para detectar cambios
-    embedding_id TEXT, -- referencia a vector store
-    last_indexed TIMESTAMP
-);
-
-CREATE TABLE note_relationships (
-    id TEXT PRIMARY KEY,
-    source_id TEXT,
-    target_id TEXT,
-    type TEXT, -- 'link', 'semantic', 'tag', 'reference'
-    strength REAL, -- 0-1
-    created_at TIMESTAMP,
-    FOREIGN KEY (source_id) REFERENCES note_nodes(id),
-    FOREIGN KEY (target_id) REFERENCES note_nodes(id)
-);
-
--- Operaciones del sistema
-CREATE TABLE operations (
-    id TEXT PRIMARY KEY,
-    type TEXT, -- 'move_note', 'add_tag', 'create_link'
-    details TEXT, -- JSON
-    status TEXT, -- 'pending', 'applied', 'reverted'
-    initiated_by TEXT, -- agent_id o 'user'
-    initiated_at TIMESTAMP,
-    applied_at TIMESTAMP
-);
-```
-
-### Archivos JSON Complementarios
+## Arquitectura de Estado MVP
 
 ```
-.brainos/
-├── brainos.db              # Base de datos principal
-├── config.json             # Configuración del sistema
-│   └── { embedding_mode, default_agents, thresholds }
-├── cache/
-│   ├── current_session.json # Sesión activa (rápido acceso)
-│   └── suggestions_queue.json # Sugerencias pendientes
-└── backups/                # Snapshots periódicos
-    └── brainos_2026-02-07.db
+┌─────────────────────────────────────────────────────────────┐
+│                    ESTADO TRANSIENTE                         │
+│                    (In-memory only)                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Sesión     │  │ Sugerencias  │  │   Contexto   │      │
+│  │   Actual     │  │  Pendientes  │  │   de Nota    │      │
+│  │              │  │              │  │              │      │
+│  │ - ID sesión  │  │ - Lista de   │  │ - Nota       │      │
+│  │ - Historial  │  │   sugerencias│  │   activa     │      │
+│  │   corto      │  │ - Estado     │  │ - Agente     │      │
+│  │   (5-10 msg) │  │   (pending/  │  │   actual     │      │
+│  │              │  │   shown/     │  │ - Modo       │      │
+│  │              │  │   accepted)  │  │   actual     │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              CONFIGURACIÓN                           │  │
+│  │  (data.json de Obsidian - persistente simple)       │  │
+│  │                                                      │  │
+│  │  - API keys (vía Obsidian SecretStorage)            │  │
+│  │  - Preferencias de UI                               │  │
+│  │  - Atajos de teclado                                │  │
+│  │  - Feature flags                                    │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Próximos Pasos
+## Ciclo de Vida del Estado
 
-1. [ ] Implementar esquema SQLite base
-2. [ ] Crear capa de abstracción (Repository pattern)
-3. [ ] Definir APIs de acceso a memoria
-4. [ ] Implementar migraciones de schema
-5. [ ] Tests de performance con datos sintéticos
+```
+Usuario abre Obsidian
+    ↓
+Plugin carga configuración desde data.json
+    ↓
+Estado in-memory inicializado (vacío)
+    ↓
+Usuario interactúa con BrainOS
+    ↓
+Estado se llena temporalmente
+    ↓
+Usuario cierra Obsidian
+    ↓
+Estado in-memory se pierde
+    ↓
+Próxima sesión: estado vacío, configuración preservada
+```
 
-## Notas de Implementación
+## Implementación
 
-### Patrón Repository
+### Estado Global (In-memory)
 
 ```typescript
-// Interfaz abstracta
-interface MemoryRepository {
-  // Sesiones
-  createSession(type: string, context: any): Promise<Session>;
-  getSession(id: string): Promise<Session>;
-  addMessage(sessionId: string, message: Message): Promise<void>;
-  
-  // Memoria a largo plazo
-  getPreference(key: string): Promise<any>;
-  setPreference(key: string, value: any, confidence?: number): Promise<void>;
-  
-  // Grafo
-  createNoteNode(note: Note): Promise<void>;
-  createRelationship(from: string, to: string, type: string, strength: number): Promise<void>;
-  getRelatedNotes(noteId: string, type?: string): Promise<Note[]>;
-  
-  // Feedback
-  recordFeedback(suggestionId: string, action: string, modified?: string): Promise<void>;
+// Estado vivo durante la sesión
+interface BrainOSState {
+  // Sesión actual
+  currentSession: {
+    id: string | null
+    messages: Message[] // Solo últimos 5-10 para contexto
+    startTime: Date
+  }
+
+  // Sugerencias activas
+  pendingSuggestions: Suggestion[]
+
+  // Contexto de trabajo
+  context: {
+    activeNote: string | null
+    currentMode: 'idle' | 'processing' | 'chat'
+    agentStatus: 'ready' | 'busy' | 'error'
+  }
 }
 
-// Implementación SQLite
-class SQLiteMemoryRepository implements MemoryRepository {
-  // ...
+// Singleton de estado
+class BrainOSStateManager {
+  private state: BrainOSState = {
+    currentSession: { id: null, messages: [], startTime: new Date() },
+    pendingSuggestions: [],
+    context: {
+      activeNote: null,
+      currentMode: 'idle',
+      agentStatus: 'ready'
+    }
+  }
+
+  // Getters y setters
+  getState(): BrainOSState { return this.state }
+  setActiveNote(path: string) { this.state.context.activeNote = path }
+  addSuggestion(suggestion: Suggestion) { this.state.pendingSuggestions.push(suggestion) }
+  clearState() { /* Reset a defaults */ }
+}
+
+export const stateManager = new BrainOSStateManager()
+```
+
+### Configuración Persistente (Simple)
+
+```typescript
+// data.json de Obsidian
+interface BrainOSConfig {
+  // Conexión
+  opencodeHost: string        // default: "http://localhost:4096"
+  autoConnect: boolean        // default: true
+
+  // Features
+  features: {
+    inlineSuggestions: boolean
+    showNotifications: boolean
+    autoOrganize: boolean     // Fase 2
+  }
+
+  // Preferencias (aprendidas manualmente)
+  preferences: {
+    defaultWorkflow: 'quick' | 'development' | 'deep'
+    autoAcceptThreshold: number  // Confidence > X para auto-aceptar
+  }
 }
 ```
 
-### Backup y Portabilidad
+## Ventajas de este enfoque
 
-- Backup automático: snapshot de .db cada día
-- Export: JSON completo del estado
-- Import: reconstruir desde JSON
-- Sync: compatible con Obsidian Sync, Dropbox, etc.
+✅ **Rápido de implementar**: Sin setup de base de datos  
+✅ **Menos bugs**: Sin sincronización estado/BD  
+✅ **Foco en flujos**: Energía en UX, no en persistencia  
+✅ **Fácil de debuggear**: Estado en memoria = inspeccionable  
+✅ **Simple de testear**: Resetear estado = reiniciar plugin  
+
+## Limitaciones aceptadas
+
+⚠️ **No hay "memoria" entre sesiones**: BrainOS no "recuerda" conversaciones pasadas  
+⚠️ **Sin aprendizaje persistente**: Preferencias se guardan manualmente, no aprendidas automáticamente  
+⚠️ **Sin analytics**: No podemos trackear uso a largo plazo fácilmente  
+
+**Mitigación**: Estas son features de v2.0, no necesarias para validar MVP.
+
+## Cuándo agregar persistencia
+
+**Post-MVP (v1.1 o v2.0) considerar**:
+
+| Feature | Persistencia sugerida | Prioridad |
+|---------|----------------------|-----------|
+| Historial de conversaciones | JSON files simples | Media |
+| Preferencias aprendidas | SQLite o JSON | Media |
+| Relaciones entre notas | SQLite + embeddings | Alta (para vaults grandes) |
+| Métricas de uso | SQLite | Baja |
+| Cache de búsquedas | In-memory LRU | Media |
+
+**Decisión de persistencia v2.0**:
+- Evaluar SQLite si vault > 500 notas
+- Evaluar embeddings si búsqueda keyword no es suficiente
+- Migración desde in-memory debe ser transparente
+
+## Migración futura (v1.1+)
+
+Si en el futuro necesitamos persistencia:
+
+```typescript
+// Versión 1.1: Agregar persistencia simple
+interface PersistentState {
+  // Guardar en JSON files
+  saveSession(session: Session): void
+  loadSession(id: string): Session | null
+  
+  // Guardar preferencias
+  savePreference(key: string, value: any): void
+  loadPreference(key: string): any
+}
+
+// Versión 2.0: Considerar SQLite si es necesario
+// Migración automática desde JSON a SQLite
+```
+
+## Comparativa: Con vs Sin Persistencia
+
+| Aspecto | Con SQLite (original) | Sin persistencia (MVP) |
+|---------|----------------------|------------------------|
+| **Tiempo implementación** | 1-2 semanas | 2-3 días |
+| **Complejidad** | Alta | Baja |
+| **Bugs potenciales** | Más (sync, migrations) | Menos |
+| **Valor para usuario** | Similar (flujos son lo importante) | Similar |
+| **Escalabilidad** | Mejor | Limitada (aceptable para MVP) |
+
+## Conclusión
+
+**Para el MVP, la simplicidad gana.**
+
+Los flujos de captura-procesamiento-organización son el core de BrainOS. La persistencia sofisticada es importante pero no crítica para validar el concepto.
+
+**Regla de oro**: Si un feature requiere base de datos, posponerlo a v2.0.
 
 ---
 
-**Decision**: PENDIENTE - Needs schema validation
-**Next Review**: After database schema PoC
+**Decision**: ✅ MVP con in-memory únicamente  
+**Persistencia compleja**: ⏸️ Posponido a v1.1/v2.0  
+**Foco**: Flujos de trabajo fluidos  
+**Next Step**: Implementar state manager in-memory simple

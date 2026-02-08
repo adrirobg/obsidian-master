@@ -10,44 +10,236 @@ Este documento describe el **sistema metodológico** de BrainOS:
 
 **Nota**: Este documento es el punto de partida para la **rama metodológica** del proyecto.
 
-## 2. Visión del Sistema Multi-Agente
+## 2. Visión del Sistema de Agente Único (MVP)
 
-### 2.1 Principios Fundamentales
+### 2.1 Principio Fundamental
 
-1. **Especialización**: Cada agente tiene un rol claro y único
-2. **Cooperación**: Agentes pueden colaborar cuando el contexto lo requiere
-3. **Transparencia**: Usuario ve qué agente actúa y por qué
-4. **Aprendizaje**: El sistema mejora con el feedback del usuario
-5. **Control**: Usuario decide nivel de autonomía por agente/tarea
+**Para el MVP: UN SOLO AGENTE que lo hace todo.**
 
-### 2.2 Arquitectura de Agentes
+La especialización en múltiples agentes (Organizador, Archivero, Conector, etc.) es potente pero compleja. Para validar el concepto, empezamos con un único **"BrainOS Assistant"** que combina todas las capacidades.
+
+**Post-MVP**: Evaluar si dividir en agentes especializados aporta valor.
+
+### 2.2 Arquitectura MVP
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   ORQUESTADOR CENTRAL                        │
+│                   BRAINOS ASSISTANT                          │
+│                    (Agente Único)                            │
 │                                                              │
-│  Responsabilidades:                                          │
-│  - Recibir input del usuario                                 │
-│  - Determinar qué agente(s) actuar                           │
-│  - Coordinar multi-agente cuando sea necesario              │
-│  - Mantener contexto de sesión                               │
-│  - Gestionar permisos y límites                              │
-└──────────────┬──────────────────────────────┬───────────────┘
-               │                              │
-    ┌──────────▼──────────┐        ┌──────────▼──────────┐
-    │   AGENTES CORE      │        │  AGENTES ESPECIAL   │
-    │   (Siempre activos) │        │  (Bajo demanda)     │
-    │                     │        │                     │
-    │ • Organizador       │        │ • Investigador      │
-    │ • Archivero         │        │ • Crítico/Reviewer  │
-    │ • Conector          │        │ • Síntesis          │
-    └─────────────────────┘        │ • Debate            │
-                                   └─────────────────────┘
+│  Capacidades combinadas:                                     │
+│  • Organizar notas (clasificar, ubicar, etiquetar)          │
+│  • Sugerir conexiones (wikilinks entre notas)               │
+│  • Procesar inbox (fleeting → literature → permanent)       │
+│  • Responder preguntas sobre el vault                        │
+│                                                              │
+│  Nivel de autonomía: Configurable por el usuario            │
+│  - Modo Sugerencia: Solo propone, usuario aplica            │
+│  - Modo Asistido: Previews, usuario confirma                │
+│  - Modo Autónomo: Aplica cambios menores automáticamente    │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                ┌──────────▼──────────┐
+                │   ORQUESTADOR       │
+                │   (Simple)          │
+                │                     │
+                │ - Recibe input      │
+                │ - Envia a Assistant │
+                │ - Muestra output    │
+                └─────────────────────┘
 ```
 
-## 3. Taxonomía de Agentes
+### 2.3 Evolución Post-MVP (v2.0+)
 
-### 3.1 Agente: Organizador (Zettelkasten)
+Una vez el sistema base esté probado, evaluar división en:
+- **Asistente** (Organización + Procesamiento)
+- **Compañero** (Conexiones + Crítica)
+- **Investigador** (Deep research)
+
+**Nota**: Esta división solo si el agente único se siente limitado en la práctica.
+
+## 3. Agente BrainOS Assistant (MVP)
+
+### 3.1 Rol y Responsabilidades
+
+**Nombre**: BrainOS Assistant  
+**Rol**: Asistente generalista para gestión del conocimiento Zettelkasten.
+
+**Responsabilidades combinadas**:
+1. **Organización**: Clasificar notas, sugerir ubicación, asignar IDs
+2. **Conexiones**: Proponer wikilinks, detectar relaciones
+3. **Procesamiento**: Convertir fleeting → literature → permanent
+4. **Consulta**: Responder preguntas sobre el vault
+
+**Para el usuario**: Un único asistente que "entiende" Zettelkasten y ayuda con todo.
+
+### 3.2 Nivel de Autonomía Configurable
+
+**Modo Sugerencia (Recomendado para empezar)**:
+- Solo propone cambios
+- Usuario aplica manualmente
+- Transparencia total
+
+**Modo Asistido**:
+- Muestra previews (ghost text, badges)
+- Usuario confirma con un click/shortcut
+- Balance control/velocidad
+
+**Modo Autónomo Limitado**:
+- Aplica solo cambios menores (tags, ubicación inbox)
+- Nunca modifica contenido sin aprobación
+- Para usuarios avanzados con confianza establecida
+
+### 3.3 Triggers y Activation
+
+**Automático**:
+- Guardar nueva nota en inbox
+- Editar nota existente (debounced)
+
+**Manual**:
+- Comando: "BrainOS: Organizar nota actual"
+- Comando: "BrainOS: Sugerir conexiones"
+- Comando: "BrainOS: Procesar inbox"
+
+### 3.4 Input/Output
+
+**Input**: Nota (título, contenido, ubicación) + Contexto (vault actual)
+
+**Output**: Sugerencias estructuradas:
+```typescript
+interface AssistantOutput {
+  type: 'organize' | 'connect' | 'process' | 'answer'
+  suggestions: Suggestion[]
+  confidence: number // 0-1
+  reasoning: string // Explicación para el usuario
+}
+```
+
+---
+
+## 4. Flujos Zettelkasten (Con Agente Único)
+
+### 4.1 Flujo: Captura → Procesamiento
+
+```
+Usuario crea nota fleeting rápida
+    ↓
+BrainOS Assistant detecta (on-save)
+    ↓
+Análisis combinado:
+  • Detecta tipo (fleeting/literature/permanent)
+  • Sugiere tags
+  • Sugiere ubicación
+  • Extrae posibles referencias
+  • Sugiere wikilinks
+    ↓
+Usuario revisa sugerencias en panel lateral
+    ↓
+Usuario acepta/rechaza/modifica
+    ↓
+Nota organizada y conectada
+```
+
+**Ejemplo de output**:
+```
+┌─ BrainOS Assistant ─────────────────────┐
+│ Sugerencias para "Idea sobre foco":     │
+│                                          │
+│ 📋 Tipo: Fleeting → Literature           │
+│ 🏷️ Tags: #productividad #foco           │
+│ 📁 Ubicación: /10-Literature/           │
+│ 🔗 Links: [[Deep Work]] [[Atención]]    │
+│                                          │
+│ [Aplicar] [Modificar] [Ignorar]         │
+└─────────────────────────────────────────┘
+```
+
+### 4.2 Flujo: Procesamiento → Permanente
+
+```
+Usuario selecciona nota literature madura
+    ↓
+Comando: "Desarrollar nota permanente"
+    ↓
+BrainOS Assistant:
+  • Analiza idea central
+  • Sugiere estructura atómica
+  • Propone conexiones a otras permanentes
+  • Crea preview de nota resultante
+    ↓
+Usuario revisa preview
+    ↓
+[Si acepta] Crea nota en /20-Permanent/
+```
+
+### 4.3 Flujo: Mantenimiento Periódico
+
+```
+[Semanal o bajo demanda]
+    ↓
+Comando: "BrainOS: Analizar vault"
+    ↓
+BrainOS Assistant:
+  • Lista notas huérfanas (sin conexiones)
+  • Detecta clusters temáticos
+  • Sugiere notas para conectar
+  • Identifica posibles duplicados
+    ↓
+Reporte simple en panel lateral
+```
+
+---
+
+## 5. Modos de Interacción
+
+### 5.1 Modo Background (Autónomo Limitado)
+
+**Cuándo**: Tareas rutinarias seguras  
+**Qué hace**: Auto-tagging, organización inbox  
+**Visibilidad**: Status bar discreto
+
+### 5.2 Modo Asistido (Recomendado)
+
+**Cuándo**: Durante escritura/edición  
+**Qué hace**: Sugerencias inline, previews  
+**Visibilidad**: Panel lateral, badges, ghost text
+
+### 5.3 Modo Consultivo
+
+**Cuándo**: Usuario solicita ayuda específica  
+**Qué hace**: Responde preguntas, analiza notas  
+**Visibilidad**: Chat simple en panel lateral
+
+---
+
+## 6. Evolución a Multi-Agente (v2.0)
+
+**Solo si el agente único demuestra limitaciones**:
+
+### Fase 2: División en 3 Agentes
+
+```
+BrainOS Assistant
+    ↓ (dividir en)
+┌─────────────┬─────────────┬─────────────┐
+│  Asistente  │  Compañero  │ Investigador│
+│  (Core)     │  (Social)   │  (Deep)     │
+├─────────────┼─────────────┼─────────────┤
+│• Organizar  │• Conectar   │• Research   │
+│• Procesar   │• Criticar   │• Síntesis   │
+│• Ubicar     │• Debate     │• Analizar   │
+└─────────────┴─────────────┴─────────────┘
+```
+
+**Criterio para dividir**: Cuando el agente único se sienta "sobrecargado" o el usuario quiera especialización.
+
+---
+
+## 7. Documentación Original (Multi-Agente)
+
+**Nota**: La documentación detallada de los 6 agentes especializados (Organizador, Archivero, Conector, Investigador, Crítico, Síntesis) se ha movido a `90-Archive/AGENTS-v2-SPEC.md` para referencia futura cuando se implemente multi-agente en v2.0.
+
+Para MVP, todo el comportamiento está consolidado en el **BrainOS Assistant** descrito arriba.
 
 **Rol**: Mantiene la integridad y estructura del sistema Zettelkasten.
 
