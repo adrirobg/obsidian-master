@@ -18,9 +18,11 @@ No es una herramienta que ejecuta comandos. Es un **colaborador cognitivo** que 
 ## 🏗️ Arquitectura
 
 ```
-┌─────────────────┐     WebSocket      ┌─────────────────┐
-│    OBSIDIAN     │  ◄──────────────►  │    OPENCODE     │
+┌─────────────────┐  HTTP (requests)   ┌─────────────────┐
+│    OBSIDIAN     │  ───────────────►  │    OPENCODE     │
 │                 │    Tiempo Real     │                 │
+│                 │  ◄───────────────  │                 │
+│                 │   SSE (eventos)    │                 │
 │ • Canvas API    │                    │ • Skills        │
 │ • Editor Ext    │                    │ • Agentes       │
 │ • UI Panels     │                    │ • LLM           │
@@ -33,6 +35,11 @@ No es una herramienta que ejecuta comandos. Es un **colaborador cognitivo** que 
               │  (filesystem)      │
               └────────────────────┘
 ```
+
+**Estado MVP v0.1 (cerrado):**
+- Protocolo de integración: **HTTP + SSE** (ADR-001).
+- Persistencia de estado: **in-memory** durante sesión; solo configuración en `data.json` (ADR-003).
+- WebSocket custom, MCP como transporte principal y persistencia avanzada: **post-MVP**.
 
 **Tres modalidades de colaboración:**
 
@@ -61,10 +68,12 @@ BrainOS/
 ├── 📄 VISION-INTEGRATED.md         ← Visión completa del sistema
 │
 ├── 📁 00-Meta/                     ← Documentación meta
-│   └── README.md
+│   ├── README.md
+│   ├── CANONICAL-SOURCE-OF-TRUTH-v0.1.md
+│   └── CANONICAL-CONTRADICTIONS-MAP.md
 │
 ├── 📁 10-Technical-Architecture/   ← Implementación técnica
-│   ├── TECHNICAL-REALTIME.md       ← Arquitectura WebSocket
+│   ├── TECHNICAL-REALTIME.md       ← Realtime MVP (HTTP+SSE)
 │   └── 01-Core-Architecture/
 │       ├── ADR-001-Communication-Protocol.md
 │       ├── ADR-002-Embedding-Strategy.md
@@ -160,7 +169,7 @@ $ opencode
 ## 🗺️ Roadmap
 
 ### Fase 0: PoC (Ahora)
-- [ ] Bridge WebSocket básico
+- [ ] Bridge HTTP+SSE básico
 - [ ] Un skill simple
 - [ ] Canvas preview básico
 
@@ -184,7 +193,8 @@ $ opencode
 ## 📚 Documentación
 
 - **[Visión Integrada](VISION-INTEGRATED.md)** - Concepto completo del sistema
-- **[Arquitectura Técnica](10-Technical-Architecture/TECHNICAL-REALTIME.md)** - WebSocket, skills, integración
+- **[Fuente Canónica v0.1](00-Meta/CANONICAL-SOURCE-OF-TRUTH-v0.1.md)** - Decisiones cerradas MVP y pendientes reales
+- **[Arquitectura Técnica](10-Technical-Architecture/TECHNICAL-MASTER.md)** - Baseline técnico MVP + evolución post-MVP
 - **[Metodología](20-Methodology-System/METHODOLOGY-MASTER.md)** - Agentes y flujos Zettelkasten
 - **[ADRs](10-Technical-Architecture/01-Core-Architecture/)** - Decisiones arquitectónicas
 
@@ -209,4 +219,3 @@ MIT License - Ver [LICENSE](LICENSE)
 **BrainOS** - *Tu segundo cerebro, potenciado por IA*
 
 **Estado**: 🟡 En diseño activo
-

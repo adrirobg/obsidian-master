@@ -8,6 +8,11 @@ Este documento describe la arquitectura técnica de BrainOS enfocándose en:
 - Flujo de datos
 - Seguridad y autenticación
 
+Estado canónico MVP v0.1:
+- **ADR-001 decidido**: protocolo de integración `HTTP + SSE`.
+- **ADR-003 decidido**: estado en memoria durante sesión; sin persistencia durable en MVP.
+- Este documento conserva opciones evolutivas para post-MVP, explícitamente marcadas.
+
 ## 2. Arquitectura de Alto Nivel
 
 ### 2.1 Diagrama Conceptual
@@ -59,21 +64,20 @@ Este documento describe la arquitectura técnica de BrainOS enfocándose en:
 └────────────────────┘              └────────────────────┘
 ```
 
+Nota de alcance: en MVP, la capa de memoria se limita a estado **in-memory** de sesión y configuración mínima de plugin. Vector store, graph DB y metadata persistente quedan para post-MVP.
+
 ## 3. Decisiones Arquitectónicas Clave
 
-### 3.1 ADR-001: Protocolo de Comunicación (PENDIENTE)
+### 3.1 ADR-001: Protocolo de Comunicación (DECIDIDO)
 
-**Opciones evaluadas:**
-1. **MCP (Model Context Protocol)** - Estándar emergente
-2. **gRPC** - Alto rendimiento, tipado fuerte
-3. **REST + WebSockets** - Universal, simple
-4. **GraphQL** - Flexible, eficiente
+**Decisión MVP**: integración Obsidian ↔ OpenCode por `HTTP + SSE`.
 
-**Criterios de decisión:**
-- Compatibilidad con ecosistema LLM
-- Facilidad de implementación
-- Soporte multi-cliente
-- Capacidades realtime
+**Implicaciones técnicas**:
+- Comandos desde plugin por HTTP.
+- Eventos en tiempo real desde OpenCode por SSE.
+- Se descarta WebSocket custom como base del MVP.
+
+**Referencia**: `10-Technical-Architecture/01-Core-Architecture/ADR-001-Communication-Protocol.md`
 
 ### 3.2 ADR-002: Estrategia de Embeddings (PENDIENTE)
 
@@ -83,13 +87,16 @@ Este documento describe la arquitectura técnica de BrainOS enfocándose en:
 - Storage de vectores (Chroma, LanceDB, SQLite-vss)
 - Estrategia de indexación incremental
 
-### 3.3 ADR-003: Persistencia de Memoria Agente (PENDIENTE)
+### 3.3 ADR-003: Persistencia de Memoria Agente (DECIDIDO)
 
-**Opciones:**
-1. SQLite local
-2. JSON files
-3. Graph database (para relaciones)
-4. Redis (si hay servidor central)
+**Decisión MVP**: estado transitorio in-memory; persistencia durable fuera de alcance.
+
+**Implicaciones técnicas**:
+- Conversación y sugerencias activas viven solo durante la sesión.
+- Persistencia limitada a configuración del plugin (`data.json` + SecretStorage).
+- Persistencia avanzada (SQLite/JSON/graph) se evaluará post-MVP.
+
+**Referencia**: `10-Technical-Architecture/01-Core-Architecture/ADR-003-Memory-Persistence.md`
 
 ### 3.4 ADR-004: Orquestación Multi-Agente (PENDIENTE)
 
@@ -136,7 +143,7 @@ Cada agente es un módulo independiente con:
 - Búsqueda semántica
 - Deduplicación de contenido
 
-**Metadata Store**:
+**Metadata Store** (Post-MVP):
 - Relaciones entre notas
 - Historial de operaciones
 - Métricas de uso
@@ -268,13 +275,13 @@ Niveles de permiso para agentes:
 | Embeddings | Ollama / OpenAI / local | Ollama (local por defecto) |
 | Vector DB | Chroma / LanceDB / sqlite-vss | LanceDB (embebido) |
 | Orchestration | LangGraph / CrewAI / Custom | Evaluando... |
-| Communication | MCP / gRPC / REST | MCP (estándar) |
+| Communication | HTTP+SSE / MCP / gRPC | HTTP+SSE en MVP; MCP post-MVP |
 
 ## 10. Próximos Pasos Técnicos
 
-1. **ADR-001**: Decidir protocolo de comunicación
-2. **PoC MCP**: Prototipo de servidor MCP básico
-3. **PoC Embeddings**: Evaluar viabilidad de indexación local
+1. **Bridge MVP**: Implementar cliente HTTP+SSE contra `opencode serve`
+2. **PoC de flujo base**: Enviar prompt, consumir eventos y aplicar sugerencia con confirmación
+3. **PoC Embeddings**: Evaluar viabilidad de indexación local (fuera del critical path del MVP)
 4. **Diseño de Agente**: Especificar primer agente (Organizador)
 5. **Contratos**: Definir interfaces entre capas
 
@@ -282,4 +289,4 @@ Niveles de permiso para agentes:
 
 **Estado**: En progreso
 **Owner**: Rama Técnica
-**Next Review**: Cuando se completen ADRs iniciales
+**Next Review**: Al cerrar PoC HTTP+SSE y checklist MVP v0.1

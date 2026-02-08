@@ -8,6 +8,12 @@ BrainOS no es una herramienta que "ejecuta comandos", es un **colaborador cognit
 - ❌ No es: "Le pido a la IA que haga algo y espero resultado"
 - ✅ Sí es: "Trabajo junto a un compañero experto en Zettelkasten que ve lo que hago y colabora"
 
+## Estado canónico v0.1 (MVP)
+
+- **Decisión cerrada (ADR-001)**: integración Obsidian ↔ OpenCode por `HTTP + SSE`.
+- **Decisión cerrada (ADR-003)**: estado transitorio in-memory durante sesión; persistencia durable, solo post-MVP.
+- La visión multi-agente y de autonomía avanzada se mantiene como dirección **post-MVP**.
+
 ## 2. Modalidades de Colaboración
 
 ### 2.1 Modo Canvas: Visual & Espacial
@@ -72,13 +78,15 @@ BrainOS: Muestra progreso en panel lateral de Obsidian
 
 ### 3.1 OpenCode ↔ Obsidian: Protocolo de Colaboración
 
-No es request/response, es **canal bidireccional persistente**:
+Para MVP no usamos bridge WebSocket custom: usamos **request/stream** con HTTP + SSE.
 
 ```
-┌─────────────────┐         WebSocket / SSE         ┌─────────────────┐
-│   Obsidian      │  ◄──────────────────────────►   │   OpenCode      │
+┌─────────────────┐      HTTP request        ┌─────────────────┐
+│   Obsidian      │  ─────────────────────►  │   OpenCode      │
 │   Plugin        │                                 │   Agent         │
 │                 │                                 │                 │
+│                 │       SSE stream         │                 │
+│                 │  ◄─────────────────────  │                 │
 │ • Canvas API    │                                 │ • Filesystem    │
 │ • Editor API    │                                 │ • LLM           │
 │ • UI Components │                                 │ • Skills        │
@@ -291,9 +299,9 @@ obsidian-brainos-plugin/
 │   ├── settings.ts                # Configuración
 │   │
 │   ├── bridge/                    # Comunicación con OpenCode
-│   │   ├── websocket-client.ts
-│   │   ├── message-handler.ts
-│   │   └── event-emitter.ts
+│   │   ├── opencode-http-client.ts
+│   │   ├── opencode-sse-subscriber.ts
+│   │   └── message-handler.ts
 │   │
 │   ├── canvas/                    # Integración Canvas
 │   │   ├── canvas-monitor.ts      # Detecta cambios
@@ -324,8 +332,8 @@ obsidian-brainos-plugin/
 ### OpenCode (Core)
 - **Runtime**: OpenCode CLI con `opencode serve` (modo servidor)
 - **Skills**: Sistema de skills personalizado para cada modo
-- **Comunicación**: WebSocket/SSE para tiempo real
-- **Storage**: Filesystem + SQLite para metadata
+- **Comunicación (MVP)**: HTTP + SSE (ADR-001)
+- **Storage (MVP)**: Filesystem + estado in-memory (ADR-003)
 
 ### Obsidian (UI)
 - **Plugin API**: TypeScript, usando APIs más recientes
@@ -334,9 +342,9 @@ obsidian-brainos-plugin/
 - **UI**: React/Svelte en paneles complejos
 
 ### Bridge
-- **Protocolo**: WebSocket bidireccional
+- **Protocolo (MVP)**: HTTP request + SSE stream
 - **Serialización**: JSON con tipos TypeScript compartidos
-- **Reconexión**: Automática con buffer de mensajes
+- **Reconexión**: Automática de stream SSE + reintentos HTTP controlados
 
 ## 7. Flujo de Datos en Tiempo Real
 
@@ -345,7 +353,7 @@ Usuario escribe en Obsidian
     ↓
 Obsidian Plugin detecta (onChange)
     ↓
-Envía a OpenCode vía WebSocket:
+Envía a OpenCode vía HTTP:
     { type: 'content_delta', data: {...} }
     ↓
 OpenCode (skill inline-assistant) procesa
@@ -356,7 +364,7 @@ Consulta vault: ¿Hay nota sobre esto?
     ↓
 Genera sugerencia
     ↓
-Envía a Obsidian vía WebSocket:
+Emite evento a Obsidian vía SSE:
     { type: 'inline_suggestion', ... }
     ↓
 Obsidian muestra ghost text
@@ -378,8 +386,7 @@ OpenCode actualiza su modelo del contexto
   "name": "BrainOS Vault",
   "server": {
     "enabled": true,
-    "port": 4096,
-    "websocket": true
+    "port": 4096
   },
   "skills": [
     "brainos/canvas-organizer",
@@ -401,7 +408,8 @@ OpenCode actualiza su modelo del contexto
 ```json
 // data.json del plugin
 {
-  "opencodeHost": "ws://localhost:4096",
+  "opencodeHost": "http://localhost:4096",
+  "transport": "http+sse",
   "autoConnect": true,
   "features": {
     "canvasCollaboration": true,
@@ -418,7 +426,7 @@ OpenCode actualiza su modelo del contexto
 ## 9. Próximos Pasos Inmediatos
 
 ### Prioridad 1: Proof of Concept
-1. **Bridge básico**: WebSocket simple entre OpenCode y Obsidian
+1. **Bridge básico**: HTTP+SSE entre OpenCode y Obsidian
 2. **Una skill**: Canvas organizer básica
 3. **Una feature**: Preview visual de sugerencias en Canvas
 
