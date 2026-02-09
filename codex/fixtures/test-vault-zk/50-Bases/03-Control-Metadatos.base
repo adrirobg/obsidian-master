@@ -1,0 +1,34 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+views:
+  - type: table
+    name: Missing kind
+    filters:
+      and:
+        - '!kind'
+    order:
+      - file.name
+      - updated
+  - type: table
+    name: Missing state
+    filters:
+      and:
+        - '!state'
+    order:
+      - file.name
+      - kind
+  - type: table
+    name: Permanent missing zettel_id
+    filters:
+      and:
+        - 'kind == "permanent" && !zettel_id'
+    order:
+      - file.name
+  - type: table
+    name: Literature missing source_ref
+    filters:
+      and:
+        - 'kind == "literature" && !source_ref'
+    order:
+      - file.name

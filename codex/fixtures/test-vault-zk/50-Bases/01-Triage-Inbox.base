@@ -1,0 +1,31 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+views:
+  - type: table
+    name: Inbox captured
+    filters:
+      and:
+        - 'file.inFolder("00-Inbox")'
+        - 'state == "captured"'
+    order:
+      - file.name
+      - kind
+      - state
+      - updated
+  - type: table
+    name: Inbox missing kind
+    filters:
+      and:
+        - 'file.inFolder("00-Inbox")'
+        - '!kind'
+    order:
+      - file.name
+      - state
+  - type: table
+    name: Imports queue
+    filters:
+      and:
+        - 'file.inFolder("00-Inbox/Imports")'
+    order:
+      - file.name

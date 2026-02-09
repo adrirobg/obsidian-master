@@ -9,6 +9,7 @@ Sistema de gestión del conocimiento aumentado por IA, construido sobre Obsidian
 - Arquitectura técnica baseline: [`BrainOS/10-Technical-Architecture/TECHNICAL-MASTER.md`](BrainOS/10-Technical-Architecture/TECHNICAL-MASTER.md)
 - Realtime MVP: [`BrainOS/10-Technical-Architecture/TECHNICAL-REALTIME.md`](BrainOS/10-Technical-Architecture/TECHNICAL-REALTIME.md)
 - Metodología de validación: [`BrainOS/20-Methodology-System/METHODOLOGY-VALIDATION-PLAYBOOK.md`](BrainOS/20-Methodology-System/METHODOLOGY-VALIDATION-PLAYBOOK.md)
+- Recursos de runtime (skills/config/fixtures): [`codex/README.md`](codex/README.md)
 
 ## Estructura
 

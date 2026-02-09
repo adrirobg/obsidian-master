@@ -1,0 +1,3 @@
+interface:
+  display_name: "Zettelkasten Operator"
+  short_description: "Run capture/process/connect/review loops in a vault"

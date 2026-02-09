@@ -1,0 +1,3 @@
+interface:
+  display_name: "Obsidian Safe Editor"
+  short_description: "Apply safe, validated edits to Obsidian files"

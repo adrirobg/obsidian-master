@@ -1,0 +1,11 @@
+# Copy manually to ~/.codex/config.toml and adjust values.
+# Keep runtime secrets out of the repository.
+
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+
+[projects."/ABSOLUTE/PATH/TO/VAULT"]
+trust_level = "trusted"
+
+# MCP endpoints are documented in ../mcp/context7/README.md.
+# Keep provider-specific credentials local only.
