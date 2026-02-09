@@ -1,0 +1,35 @@
+filters:
+  and:
+    - file.ext == "md"
+formulas:
+  missing_kind: '!kind'
+  missing_state: '!state'
+  permanent_missing_zettel: 'kind == "permanent" && !zettel_id'
+  literature_missing_source: 'kind == "literature" && !source_ref'
+views:
+  - type: table
+    name: Missing kind
+    filters:
+      - missing_kind
+    order:
+      - file.name
+      - note.updated
+  - type: table
+    name: Missing state
+    filters:
+      - missing_state
+    order:
+      - file.name
+      - note.kind
+  - type: table
+    name: Permanent missing zettel_id
+    filters:
+      - permanent_missing_zettel
+    order:
+      - file.name
+  - type: table
+    name: Literature missing source_ref
+    filters:
+      - literature_missing_source
+    order:
+      - file.name

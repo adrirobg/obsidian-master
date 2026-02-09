@@ -1,0 +1,20 @@
+filters:
+  and:
+    - file.ext == "md"
+    - kind == "permanent"
+views:
+  - type: table
+    name: Permanentes
+    order:
+      - file.name
+      - note.state
+      - note.zettel_id
+      - note.updated
+  - type: table
+    name: Pendientes de handoff
+    filters:
+      - file.inFolder("20-Permanent")
+      - state == "processed"
+    order:
+      - file.name
+      - note.source_ref

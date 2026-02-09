@@ -1,0 +1,195 @@
+{
+  "main": {
+    "id": "9287cad14a691ed0",
+    "type": "split",
+    "children": [
+      {
+        "id": "92da004807a51ed2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "18b1104c2145d129",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "40-Projects/PROJECT-piloto-vault-agent-core.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PROJECT-piloto-vault-agent-core"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "724f40dc72000547",
+    "type": "split",
+    "children": [
+      {
+        "id": "951929052e5de0c8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "eab50c88659cd690",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "0c16daac255c5201",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "e003b8a110c13800",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e9772f11889b721c",
+    "type": "split",
+    "children": [
+      {
+        "id": "d3eea21cd9a7003f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8e7d0797422f9ffe",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "40-Projects/PROJECT-piloto-vault-agent-core.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for PROJECT-piloto-vault-agent-core"
+            }
+          },
+          {
+            "id": "d58f9ebe3f213d15",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "40-Projects/PROJECT-piloto-vault-agent-core.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from PROJECT-piloto-vault-agent-core"
+            }
+          },
+          {
+            "id": "ed3712bde56da5b0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "bd7c0d325ffadc11",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "fc9f0c9916effb76",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "40-Projects/PROJECT-piloto-vault-agent-core.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of PROJECT-piloto-vault-agent-core"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "18b1104c2145d129",
+  "lastOpenFiles": [
+    "20-Permanent/PERM-202602091940-kpi-conexiones-utiles.md",
+    "10-Literature/LIT-video-zettelkasten-connections.md",
+    "10-Literature/LIT-obsidian-help-create-vault-2026-02-09.md",
+    "30-Index/INDEX-pensamiento-conectado.md",
+    "50-Bases/01-Triage-Inbox.base",
+    "50-Bases/02-Revision-Permanentes.base",
+    "50-Bases/03-Control-Metadatos.base"
+  ]
+}

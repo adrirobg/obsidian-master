@@ -2,7 +2,7 @@
 
 ## Estado actual
 - Fecha de actualizacion: 2026-02-09
-- Fase: Marco metodologico consolidado + AGENTS.md v0.3 integrado
+- Fase: Marco metodologico consolidado + Fase 3 en ejecucion (templates + vault de test)
 - Estado general: En progreso controlado
 
 ## Hito confirmado
@@ -35,6 +35,24 @@ Construir un agente para gestionar Zettelkasten en Obsidian, con enfoque practic
 - `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/OBSIDIAN-FUNDAMENTALS-FOR-AGENT.md`
 - Analisis tradicional desde archivo:
 - `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Research/TRADITIONAL-ZETTELKASTEN-ANALYSIS-FROM-ARCHIVE.md`
+- Investigacion de templates (Obsidian docs + Kepano + fuentes metodologicas):
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Research/OBSIDIAN-TEMPLATES-RESEARCH-2026-02-09.md`
+- Templates iniciales v0.1:
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/01-Fleeting.md`
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/02-Literature.md`
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/03-Permanent.md`
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/04-Index.md`
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/05-Project.md`
+- Guia de uso de templates:
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Templates/README.md`
+- Investigacion oficial sobre creacion/apertura de vault en Obsidian:
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Research/OBSIDIAN-VAULT-CREATION-RESEARCH-2026-02-09.md`
+- Vault de prueba Zettelkasten (dataset semilla + imports + vistas bases):
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/Test-Vault-Zettelkasten/`
+- Runbook de prueba del agente sobre vault de test:
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/TEST-VAULT-AGENT-RUNBOOK-2026-02-09.md`
+- Script de import de apuntes a la vault de test:
+- `/Users/adri/dev/obsidian-master/worktrees/video-transcripts-research-v1/BrainOS/30-Implementation/Vault-Agent-Core/scripts/import_apuntes_to_test_vault.sh`
 
 ## Decisiones cerradas (usuario)
 - Sistema no estricto.
@@ -61,9 +79,10 @@ Construir un agente para gestionar Zettelkasten en Obsidian, con enfoque practic
 
 ## Siguiente hito recomendado
 Fase 3: bajar fundamentos + flujo a implementacion inicial.
-- Definir templates concretas (`fleeting`, `literature`, `permanent`, `index`, `project`).
-- Definir bases operativas de triage y seguimiento.
+- Definir templates concretas (`fleeting`, `literature`, `permanent`, `index`, `project`). (completado v0.1)
+- Definir bases operativas de triage y seguimiento. (prototipo en vault de test)
 - Especificar contrato CLI de `zettelkasten-operator` (comandos y validaciones).
+- Ejecutar primera corrida de prueba guiada sobre la vault de test y registrar findings.
 
 ## Instrucciones para nuevas sesiones Codex
 1. Leer primero `AGENTS.md` y este `status.md`.
