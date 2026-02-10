@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "text",
+      "x": 100,
+      "y": 100,
+      "width": 300,
+      "height": 120,
+      "text": "Idea principal"
+    },
+    {
+      "id": "n2",
+      "type": "text",
+      "x": 500,
+      "y": 100,
+      "width": 300,
+      "height": 120,
+      "text": "Siguiente acción"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "n1",
+      "toNode": "n2"
+    }
+  ]
+}
