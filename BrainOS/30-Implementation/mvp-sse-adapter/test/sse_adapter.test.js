@@ -150,6 +150,33 @@ test('SSEClient flushes trailing event when stream closes without blank separato
   assert.equal(normalized[0].type, 'end');
 });
 
+
+test('SSEClient falls back to default reconnect delays for invalid values', async () => {
+  const fetchImpl = async () => new Response(streamFromText(['event: start\ndata: {"status":"started"}\n\n']), {
+    status: 200,
+    headers: { 'content-type': 'text/event-stream' },
+  });
+
+  const statuses = [];
+  const client = new SSEClient({ fetchImpl, adapter: new RuntimeEventAdapter() });
+
+  await client.connect({
+    url: 'http://localhost:4096/sse/session/fallback-reconnect',
+    sessionId: 'session-fallback-reconnect',
+    reconnect: { enabled: true, initialDelayMs: 'not-a-number', maxDelayMs: -1 },
+    onStatus: (status) => {
+      statuses.push(status);
+      if (status.state === 'reconnecting') {
+        client.close();
+      }
+    },
+  });
+
+  const reconnectStatus = statuses.find((status) => status.state === 'reconnecting');
+  assert.equal(reconnectStatus.retryMs, 500);
+  assert.equal(statuses.at(-1).state, 'closed');
+});
+
 test('SSEClient close cancels reconnect delay immediately', async () => {
   const fetchImpl = async () => new Response(streamFromText(['event: start\ndata: {"status":"started"}\n\n']), {
     status: 200,

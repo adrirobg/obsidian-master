@@ -76,7 +76,7 @@ export class OpenCodeHttpClient {
         signal
       })
 
-      const payload = await this.#readPayload(response)
+      const payload = await this.#readPayload(response, { method, path })
 
       if (!response.ok) {
         throw new OpenCodeRuntimeError('OpenCode runtime returned an error', {
@@ -110,10 +110,29 @@ export class OpenCodeHttpClient {
     }
   }
 
-  async #readPayload(response) {
+  async #readPayload(response, meta) {
     const contentType = response.headers.get('content-type') ?? ''
     if (contentType.includes('application/json')) {
-      return response.json()
+      const text = await response.text()
+
+      if (!text || !text.trim()) {
+        throw new OpenCodeRuntimeError('OpenCode runtime returned an empty JSON payload', {
+          status: response.status,
+          body: null,
+          meta: { ...meta, reason: 'empty_json_payload' }
+        })
+      }
+
+      try {
+        return JSON.parse(text)
+      } catch (cause) {
+        throw new OpenCodeRuntimeError('OpenCode runtime returned invalid JSON payload', {
+          status: response.status,
+          body: { raw: text },
+          cause,
+          meta: { ...meta, reason: 'invalid_json_payload' }
+        })
+      }
     }
 
     const text = await response.text()

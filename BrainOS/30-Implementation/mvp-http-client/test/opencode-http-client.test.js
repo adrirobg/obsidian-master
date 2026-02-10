@@ -123,6 +123,64 @@ test('timeout is enforced for fetch implementations that wait on abort signal', 
   })
 })
 
+
+test('maps invalid JSON payloads on successful HTTP responses to OpenCodeRuntimeError', async () => {
+  const fetchImpl = async () => ({
+    ok: true,
+    status: 200,
+    headers: {
+      get(name) {
+        return name.toLowerCase() === 'content-type' ? 'application/json' : null
+      }
+    },
+    async text() {
+      return '{"unfinished":true'
+    }
+  })
+
+  const client = new OpenCodeHttpClient({
+    baseUrl: 'http://runtime.test',
+    timeoutMs: 250,
+    fetchImpl
+  })
+
+  await assert.rejects(() => client.healthCheck(), (error) => {
+    assert.equal(error instanceof OpenCodeRuntimeError, true)
+    assert.equal(error instanceof OpenCodeNetworkError, false)
+    assert.equal(error.status, 200)
+    assert.equal(error.meta.reason, 'invalid_json_payload')
+    return true
+  })
+})
+
+test('maps empty JSON payloads to OpenCodeRuntimeError', async () => {
+  const fetchImpl = async () => ({
+    ok: true,
+    status: 200,
+    headers: {
+      get(name) {
+        return name.toLowerCase() === 'content-type' ? 'application/json' : null
+      }
+    },
+    async text() {
+      return ''
+    }
+  })
+
+  const client = new OpenCodeHttpClient({
+    baseUrl: 'http://runtime.test',
+    timeoutMs: 250,
+    fetchImpl
+  })
+
+  await assert.rejects(() => client.healthCheck(), (error) => {
+    assert.equal(error instanceof OpenCodeRuntimeError, true)
+    assert.equal(error.status, 200)
+    assert.equal(error.meta.reason, 'empty_json_payload')
+    return true
+  })
+})
+
 test('maps connection failures to OpenCodeNetworkError', async () => {
   const fetchImpl = async () => {
     throw new TypeError('fetch failed')

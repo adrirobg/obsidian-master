@@ -30,10 +30,21 @@ function sleep(ms, { signal } = {}) {
 
 function buildReconnectConfig(userConfig = {}) {
   const merged = { ...DEFAULT_RECONNECT, ...userConfig };
+  const initialDelayMs = Number(merged.initialDelayMs);
+  const maxDelayMs = Number(merged.maxDelayMs);
+
+  const safeInitialDelayMs = Number.isFinite(initialDelayMs) && initialDelayMs >= 0
+    ? initialDelayMs
+    : DEFAULT_RECONNECT.initialDelayMs;
+
+  const safeMaxDelayMs = Number.isFinite(maxDelayMs) && maxDelayMs >= 0
+    ? maxDelayMs
+    : DEFAULT_RECONNECT.maxDelayMs;
+
   return {
     enabled: Boolean(merged.enabled),
-    initialDelayMs: Number(merged.initialDelayMs),
-    maxDelayMs: Number(merged.maxDelayMs),
+    initialDelayMs: safeInitialDelayMs,
+    maxDelayMs: Math.max(safeInitialDelayMs, safeMaxDelayMs),
   };
 }
 
