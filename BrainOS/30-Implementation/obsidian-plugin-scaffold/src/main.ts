@@ -1,5 +1,6 @@
 import { Notice, Plugin, requestUrl, requireApiVersion } from 'obsidian';
 import { OpenCodeHttpClient } from './runtime';
+import { resolveBasicAuthHeader } from './runtime/auth-header.js';
 import {
 	BrainOSPluginSettings,
 	BrainOSSettingTab,
@@ -91,7 +92,7 @@ export default class BrainOSPlugin extends Plugin {
 
 	private createRuntimeFetch(pluginSignal: AbortSignal): typeof fetch {
 		return async (input, init) => {
-			const authHeader = this.buildAuthorizationHeader(this.settings.auth);
+			const authHeader = await this.buildAuthorizationHeader(this.settings.auth);
 			const headers = new Headers(init?.headers ?? {});
 			if (authHeader) {
 				headers.set('authorization', authHeader);
@@ -154,28 +155,12 @@ export default class BrainOSPlugin extends Plugin {
 		return merged.signal;
 	}
 
-	private buildAuthorizationHeader(auth: RuntimeAuthSettings | null): string | null {
-		if (!auth) {
-			return null;
-		}
-
-		const username = auth.username.trim();
-		if (!username) {
-			return null;
-		}
-
-		const secretId = auth.passwordSecretId.trim();
-		if (!secretId) {
-			return null;
-		}
-
-		const password = this.app.secretStorage.getSecret(secretId);
-		if (!password) {
-			return null;
-		}
-
-		const encoded = this.encodeBase64(`${username}:${password}`);
-		return `Basic ${encoded}`;
+	private async buildAuthorizationHeader(auth: RuntimeAuthSettings | null): Promise<string | null> {
+		return resolveBasicAuthHeader({
+			auth,
+			secretStorage: this.app.secretStorage,
+			encodeBase64: (value) => this.encodeBase64(value)
+		});
 	}
 
 	private encodeBase64(value: string): string {
