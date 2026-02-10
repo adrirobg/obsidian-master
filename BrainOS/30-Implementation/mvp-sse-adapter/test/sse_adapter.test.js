@@ -44,6 +44,19 @@ test('SSEParser parses fields, comments and multiline data', () => {
   assert.equal(events[0].data, '{"percent":20}\n{"step":"read"}');
 });
 
+test('SSEParser flush dispatches trailing event without blank separator', () => {
+  const events = [];
+  const parser = new SSEParser({ onEvent: (event) => events.push(event) });
+
+  parser.feed('event: message\n');
+  parser.feed('data: {"message":"tail"}\n');
+  parser.flush();
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].event, 'message');
+  assert.equal(events[0].data, '{"message":"tail"}');
+});
+
 test('RuntimeEventAdapter normalizes known events and ignores unknown safely', () => {
   const traces = [];
   const adapter = new RuntimeEventAdapter({ onTrace: (trace) => traces.push(trace) });

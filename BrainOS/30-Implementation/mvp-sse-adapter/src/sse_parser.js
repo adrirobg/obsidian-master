@@ -52,6 +52,8 @@ export class SSEParser {
       this.#processLine(this.buffer);
       this.buffer = '';
     }
+
+    this.#dispatchEvent();
   }
 
   #processLine(line) {
