@@ -2,7 +2,9 @@
 
 Código de implementación de BrainOS.
 
-Estado actual: pendiente de inicio.
+Estado actual:
+
+- `mvp-http-client/`: cliente HTTP mínimo para `opencode serve` (issue #1).
 
 Primer objetivo:
 
@@ -20,3 +22,6 @@ Validación local:
 ```bash
 node --test BrainOS/30-Implementation/session/SessionStateManager.test.js
 ```
+Implementación local inicial:
+
+- `mvp-sse-adapter/`: cliente SSE MVP con adaptador de eventos y pruebas smoke locales.
