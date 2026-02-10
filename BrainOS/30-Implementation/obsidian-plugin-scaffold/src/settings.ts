@@ -1,10 +1,10 @@
 /* eslint-disable obsidianmd/ui/sentence-case, obsidianmd/settings-tab/no-problematic-settings-headings */
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, SecretComponent, Setting } from 'obsidian';
 import BrainOSPlugin from './main';
 
 export interface RuntimeAuthSettings {
 	username: string;
-	password: string;
+	passwordSecretId: string;
 }
 
 export interface BrainOSPluginSettings {
@@ -75,7 +75,7 @@ export class BrainOSSettingTab extends PluginSettingTab {
 					.setValue(authEnabled)
 					.onChange(async (enabled) => {
 						this.plugin.settings.auth = enabled
-							? (this.plugin.settings.auth ?? { username: 'opencode', password: '' })
+							? (this.plugin.settings.auth ?? { username: 'opencode', passwordSecretId: '' })
 							: null;
 						await this.plugin.saveSettings();
 						this.display();
@@ -102,21 +102,18 @@ export class BrainOSSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Authentication password')
-			.setDesc('Password configured in the runtime server environment.')
-			.addText((text) => {
-				text.inputEl.type = 'password';
-				text
-					.setPlaceholder('optional')
-					.setValue(this.plugin.settings.auth?.password ?? '')
-					.setDisabled(!authEnabled)
+			.setDesc('Stored in Obsidian SecretStorage (requires Obsidian 1.11.4+).')
+			.addComponent((componentEl) =>
+				new SecretComponent(this.app, componentEl)
+					.setValue(this.plugin.settings.auth?.passwordSecretId ?? '')
 					.onChange(async (value) => {
 						if (!this.plugin.settings.auth) {
 							return;
 						}
 
-						this.plugin.settings.auth.password = value;
+						this.plugin.settings.auth.passwordSecretId = value.trim();
 						await this.plugin.saveSettings();
-					});
-			});
+					})
+			);
 	}
 }

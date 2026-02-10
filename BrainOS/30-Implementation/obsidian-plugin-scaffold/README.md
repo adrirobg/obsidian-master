@@ -6,8 +6,11 @@ Scaffold ejecutable de plugin Obsidian basado en [Build a plugin](https://docs.o
 - Settings persistentes en `data.json` usando `loadData`/`saveData`:
   - `runtimeBaseUrl`
   - `batchSize`
-  - `auth` opcional (Basic auth)
+  - `auth.username` + `auth.passwordSecretId` (el secret real se guarda en `SecretStorage`, no en `data.json`)
 - Comando `BrainOS: Runtime Health Check` que consulta el runtime real (`GET /global/health`) vía cliente HTTP MVP embebido (`src/runtime/*`, mismo contrato del módulo `mvp-http-client`).
+
+Requisito de versión:
+- `minAppVersion: 1.11.4` (usa `SecretStorage`/`SecretComponent`).
 
 ## Build reproducible
 
@@ -33,4 +36,5 @@ Artefactos requeridos para cargar en Obsidian:
 4. Reinicia Obsidian o recarga plugins.
 5. Activa el plugin en Obsidian.
 6. Configura `Runtime base URL` (por defecto `http://localhost:4096`).
-7. Ejecuta el comando `BrainOS: Runtime Health Check`.
+7. En settings de auth, selecciona/crea el secreto de password con `SecretComponent`.
+8. Ejecuta el comando `BrainOS: Runtime Health Check`.

@@ -1,4 +1,4 @@
-import { Notice, Plugin, requestUrl } from 'obsidian';
+import { Notice, Plugin, requestUrl, requireApiVersion } from 'obsidian';
 import { OpenCodeHttpClient } from './runtime';
 import {
 	BrainOSPluginSettings,
@@ -19,6 +19,12 @@ export default class BrainOSPlugin extends Plugin {
 	private activeHealthChecks = new Set<AbortController>();
 
 	async onload() {
+		if (!requireApiVersion('1.11.4')) {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			new Notice('BrainOS runtime scaffold requires Obsidian 1.11.4 or newer.');
+			return;
+		}
+
 		await this.loadSettings();
 
 		this.statusBarItemEl = this.addStatusBarItem();
@@ -84,9 +90,8 @@ export default class BrainOSPlugin extends Plugin {
 	}
 
 	private createRuntimeFetch(pluginSignal: AbortSignal): typeof fetch {
-		const authHeader = this.buildAuthorizationHeader(this.settings.auth);
-
 		return async (input, init) => {
+			const authHeader = this.buildAuthorizationHeader(this.settings.auth);
 			const headers = new Headers(init?.headers ?? {});
 			if (authHeader) {
 				headers.set('authorization', authHeader);
@@ -159,7 +164,16 @@ export default class BrainOSPlugin extends Plugin {
 			return null;
 		}
 
-		const password = auth.password ?? '';
+		const secretId = auth.passwordSecretId.trim();
+		if (!secretId) {
+			return null;
+		}
+
+		const password = this.app.secretStorage.getSecret(secretId);
+		if (!password) {
+			return null;
+		}
+
 		const encoded = this.encodeBase64(`${username}:${password}`);
 		return `Basic ${encoded}`;
 	}
@@ -222,9 +236,11 @@ export default class BrainOSPlugin extends Plugin {
 		let auth: RuntimeAuthSettings | null = null;
 		if (raw.auth && typeof raw.auth === 'object') {
 			const username = typeof raw.auth.username === 'string' ? raw.auth.username.trim() : '';
-			const password = typeof raw.auth.password === 'string' ? raw.auth.password : '';
+			const passwordSecretId = typeof raw.auth.passwordSecretId === 'string'
+				? raw.auth.passwordSecretId.trim()
+				: '';
 			if (username) {
-				auth = { username, password };
+				auth = { username, passwordSecretId };
 			}
 		}
 
