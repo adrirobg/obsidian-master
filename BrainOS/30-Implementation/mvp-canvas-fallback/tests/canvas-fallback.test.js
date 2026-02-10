@@ -137,3 +137,30 @@ test('applySuggestedCanvas rolls back target when write fails after backup', asy
     assert.equal(finalCanvas.nodes[0].text, 'Hola');
   });
 });
+
+test('applySuggestedCanvas uses unique backup path when timestamp backup already exists', async () => {
+  await withTempDir(async (dir) => {
+    const targetPath = path.join(dir, 'board.canvas');
+    const suggestedPath = buildSuggestedPath(targetPath);
+
+    await fs.writeFile(targetPath, JSON.stringify(BASE_CANVAS), 'utf8');
+    await fs.writeFile(suggestedPath, JSON.stringify(BASE_CANVAS), 'utf8');
+
+    const fixedTimestamp = 1700000000000;
+    const existingBackupPath = `${targetPath}.bak.${fixedTimestamp}`;
+    await fs.writeFile(existingBackupPath, 'existing-backup', 'utf8');
+
+    const originalDateNow = Date.now;
+    Date.now = () => fixedTimestamp;
+
+    try {
+      const result = await applySuggestedCanvas({ targetCanvasPath: targetPath, approved: true });
+      assert.equal(result.backupPath, `${existingBackupPath}.1`);
+
+      const existingBackup = await fs.readFile(existingBackupPath, 'utf8');
+      assert.equal(existingBackup, 'existing-backup');
+    } finally {
+      Date.now = originalDateNow;
+    }
+  });
+});

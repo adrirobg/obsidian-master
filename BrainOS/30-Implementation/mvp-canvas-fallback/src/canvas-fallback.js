@@ -1,5 +1,6 @@
 'use strict';
 
+const { constants: fsConstants } = require('node:fs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -216,8 +217,28 @@ async function applySuggestedCanvas(params) {
     throw new Error(`Suggested canvas is invalid; refusing to apply: ${suggestedData.validation.errors.join('; ')}`);
   }
 
-  const backupPath = `${targetCanvasPath}.bak.${Date.now()}`;
-  await fs.copyFile(targetCanvasPath, backupPath);
+  const backupBasePath = `${targetCanvasPath}.bak.${Date.now()}`;
+  let backupPath;
+
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const candidatePath = attempt === 0 ? backupBasePath : `${backupBasePath}.${attempt}`;
+
+    try {
+      await fs.copyFile(targetCanvasPath, candidatePath, fsConstants.COPYFILE_EXCL);
+      backupPath = candidatePath;
+      break;
+    } catch (error) {
+      if (error && error.code === 'EEXIST') {
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  if (!backupPath) {
+    throw new Error(`Failed to allocate unique backup path for ${targetCanvasPath} after 100 attempts.`);
+  }
 
   try {
     if (injectFailureAfterBackup) {
