@@ -2,14 +2,30 @@
 
 Código de implementación de BrainOS.
 
-Estado actual: en preparación de flujos MVP.
+Estado actual:
 
-## Objetivo base
+- `mvp-http-client/`: cliente HTTP mínimo para `opencode serve` (issue #1).
+
+Entregables actuales:
+
+- [MVP-04: Procesar nota actual con confirmación](MVP-04-PROCESAR-NOTA-ACTUAL.md)
+
+Objetivo inmediato:
 
 - Plugin Obsidian -> OpenCode (`opencode serve`) con flujo HTTP + SSE.
 
-## Entregables activos en esta rama
+## MVP-03: Session State Manager (in-memory)
 
-- `MVP-06-INBOX-BATCH-FLOW.md`
-  - Flujo de procesamiento de inbox en lote pequeño (secuencial y user-controlled).
-  - Progreso por ítem, aceptar/rechazar por nota y registro de decisiones.
+Implementación local del issue #3 (ADR-003):
+
+- `session/SessionStateManager.js`
+- `session/SessionStateManager.test.js`
+
+Validación local:
+
+```bash
+node --test BrainOS/30-Implementation/session/SessionStateManager.test.js
+```
+Implementación local inicial:
+
+- `mvp-sse-adapter/`: cliente SSE MVP con adaptador de eventos y pruebas smoke locales.
