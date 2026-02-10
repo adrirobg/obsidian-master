@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MVP-05 Review UI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="card status-card">
+        <h1>UI de revisión de sugerencias</h1>
+        <div id="state-badge" class="badge" data-state="idle"></div>
+        <p id="state-text">Estado actual: idle</p>
+        <p id="action-log" class="muted">Sin decisión final aún.</p>
+      </section>
+
+      <section class="card controls-card">
+        <h2>Simulación runtime</h2>
+        <div class="row">
+          <button id="simulate-processing">Procesar sugerencia</button>
+          <button id="simulate-runtime-error" class="secondary">Simular error runtime</button>
+        </div>
+        <pre id="error-box" class="error-box" aria-live="polite"></pre>
+      </section>
+
+      <section class="card preview-card">
+        <h2>Preview de cambios</h2>
+        <div class="preview-grid">
+          <label>
+            Original
+            <textarea id="original-preview" readonly></textarea>
+          </label>
+          <label>
+            Sugerencia
+            <textarea id="suggestion-preview" readonly></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="card decision-card">
+        <h2>Decisión explícita</h2>
+        <div class="row">
+          <button id="accept" class="accept">Aceptar</button>
+          <button id="reject" class="reject">Rechazar</button>
+          <button id="cancel" class="secondary">Cancelar</button>
+        </div>
+        <label>
+          Contenido resultante
+          <textarea id="result-preview" readonly></textarea>
+        </label>
+      </section>
+    </main>
+
+    <script type="module" src="./app.mjs"></script>
+  </body>
+</html>
