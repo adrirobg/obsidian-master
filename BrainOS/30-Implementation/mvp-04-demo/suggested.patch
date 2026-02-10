@@ -1,6 +1,7 @@
---- a/00-Inbox/idea-friccion-inbox.md
-+++ b/00-Inbox/idea-friccion-inbox.md
-@@
+--- a/BrainOS/30-Implementation/mvp-04-demo/active-note.md
++++ b/BrainOS/30-Implementation/mvp-04-demo/active-note.md
+@@ -9,3 +9,8 @@ status: inbox
+ 
  Hoy noté que capturo rápido, pero me cuesta decidir si una nota debe subir a literature.
  Quiero una sugerencia concreta de siguiente paso.
 +
