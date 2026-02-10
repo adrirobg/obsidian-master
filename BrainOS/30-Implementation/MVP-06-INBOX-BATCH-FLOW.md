@@ -21,7 +21,7 @@ Included in MVP-06:
 - deterministic sequence order (oldest first by default)
 - realtime progress visible in UI for each item
 - explicit user decision per note: `accept` or `reject`
-- decision log persisted as local validation artifact
+- decision summary kept in-memory for current session only (MVP)
 - guardrail: never auto-delete inbox notes
 
 Out of scope:
@@ -51,7 +51,7 @@ Out of scope:
    - render final suggestion
    - wait for explicit user decision (`accept` or `reject`)
    - apply accepted change only after confirmation
-   - append decision to local log
+   - update in-memory session counters/log
 5. Finish with summary (`processed`, `accepted`, `rejected`, `errors`).
 
 ## 5. Data contracts (internal, plugin-side)
@@ -121,7 +121,7 @@ async function processInboxBatch(config: InboxBatchConfig): Promise<void> {
         ui.updateProgress({ itemId: item.id, index: i + 1, total: items.length, status: "rejected" });
       }
 
-      await appendDecisionLog({
+      sessionMetrics.recordDecision({
         timestamp: new Date().toISOString(),
         itemId: item.id,
         itemPath: item.path,
@@ -137,20 +137,25 @@ async function processInboxBatch(config: InboxBatchConfig): Promise<void> {
 }
 ```
 
-## 7. Decision log format (methodology validation)
+## 7. Session decision tracking (methodology validation)
 
-Recommended local file:
+MVP rule: tracking stays in runtime memory and is discarded at session end.
 
-- `BrainOS/30-Implementation/artifacts/inbox-batch-decisions.jsonl`
+Allowed persistence boundary in MVP:
 
-JSON Lines example:
+- plugin configuration only (`data.json` + SecretStorage)
+- no durable per-session decision/event history written by plugin runtime
+
+If validation requires durable analysis artifacts, export must be explicit and user-triggered outside the MVP runtime critical path.
+
+Entry shape example:
 
 ```json
 {"timestamp":"2026-02-10T18:10:11.000Z","itemId":"20260209102301","itemPath":"00-Inbox/idea-a.md","action":"accept","reason":"clear next step","sessionId":"sess_001"}
 {"timestamp":"2026-02-10T18:11:42.000Z","itemId":"20260209103055","itemPath":"00-Inbox/link-b.md","action":"reject","reason":"not relevant this week","sessionId":"sess_001"}
 ```
 
-This log supports playbook metrics:
+This per-session tracking supports playbook metrics:
 
 - decision coverage per inbox item
 - acceptance/rejection ratio
