@@ -17,7 +17,7 @@ description: Clasifica entradas de inbox con decisiones explícitas y sin automa
 
 ## Salida obligatoria por ítem
 
-1. Tipo sugerido: `fleeting` | `literature` | `candidato-permanent` | `descartar`.
+1. Tipo sugerido: `fleeting` | `literature` | `structure` | `candidato-permanent` | `descartar`.
 2. Decisión propuesta: `procesar ahora` | `review later` | `descartar`.
 3. Justificación breve (1-2 líneas).
 4. Confirmación requerida del usuario.
