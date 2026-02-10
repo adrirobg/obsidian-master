@@ -7,3 +7,7 @@ Estado actual: pendiente de inicio.
 Primer objetivo:
 
 - Plugin Obsidian -> OpenCode (`opencode serve`) con flujo HTTP + SSE.
+
+Implementaciones locales en este repositorio:
+
+- `mvp-canvas-fallback/`: fallback MVP para Canvas por archivo `.canvas` con validación, confirmación explícita y rollback seguro.
