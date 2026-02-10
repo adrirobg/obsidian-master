@@ -83,14 +83,10 @@ test('maps non-2xx responses to OpenCodeRuntimeError', async () => {
 })
 
 test('maps timeout to OpenCodeTimeoutError', async () => {
-  const fetchImpl = async (_url, options) => {
-    await new Promise((_, reject) => {
-      options.signal.addEventListener('abort', () => {
-        const timeoutError = new Error('The operation was aborted due to timeout')
-        timeoutError.name = 'TimeoutError'
-        reject(timeoutError)
-      })
-    })
+  const fetchImpl = async () => {
+    const timeoutError = new Error('The operation was aborted due to timeout')
+    timeoutError.name = 'TimeoutError'
+    throw timeoutError
   }
 
   const client = new OpenCodeHttpClient({
