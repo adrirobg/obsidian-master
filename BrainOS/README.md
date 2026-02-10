@@ -9,6 +9,7 @@ BrainOS es un sistema de colaboración entre Obsidian y un runtime de agentes (O
 - Protocolo: **HTTP + SSE** (ADR-001).
 - Estado de sesión: **in-memory** (ADR-003).
 - Embeddings, multi-agente y persistencia durable: **post-MVP**.
+- Implementación MVP integrada en `30-Implementation` (issues #1 a #8).
 
 ## Arquitectura MVP
 
@@ -51,12 +52,16 @@ BrainOS/
 - [Arquitectura Técnica (MVP)](10-Technical-Architecture/TECHNICAL-MASTER.md)
 - [Realtime MVP](10-Technical-Architecture/TECHNICAL-REALTIME.md)
 - [Playbook Metodológico](20-Methodology-System/METHODOLOGY-VALIDATION-PLAYBOOK.md)
+- [Implementación MVP](30-Implementation/README.md)
 
 ## Siguiente Paso de Construcción
 
-1. Spike técnico: conexión plugin -> `opencode serve` por HTTP+SSE.
-2. Flujo end-to-end mínimo: nota actual -> sugerencia -> aceptar/rechazar.
-3. Plantillas metodológicas del playbook aplicadas al vault.
+1. Integrar `mvp-http-client` y `mvp-sse-adapter` en un esqueleto real de plugin Obsidian.
+2. Conectar flujo E2E operativo:
+   nota actual -> runtime -> sugerencia -> aceptar/rechazar.
+3. Integrar estado de sesión (`SessionStateManager`) en lifecycle de comando/sesión.
+4. Integrar fallback `.canvas` con confirmación explícita en UI.
+5. Ejecutar validación metodológica en vault real (2-3 semanas) y registrar fricciones.
 
 ## Archivo Histórico
 
