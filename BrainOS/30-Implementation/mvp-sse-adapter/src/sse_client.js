@@ -6,8 +6,26 @@ const DEFAULT_RECONNECT = {
   maxDelayMs: 5000,
 };
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms, { signal } = {}) {
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve(true);
+    }, ms);
+
+    const onAbort = () => {
+      clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', onAbort);
+      resolve(false);
+    };
+
+    signal?.addEventListener('abort', onAbort);
+  });
 }
 
 function buildReconnectConfig(userConfig = {}) {
@@ -28,6 +46,7 @@ export class SSEClient {
     this.adapter = adapter;
     this.onTrace = onTrace;
     this.abortController = null;
+    this.closeController = null;
     this.closed = false;
     this.currentRetryMs = DEFAULT_RECONNECT.initialDelayMs;
   }
@@ -37,6 +56,9 @@ export class SSEClient {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
+    }
+    if (this.closeController) {
+      this.closeController.abort();
     }
   }
 
@@ -50,6 +72,7 @@ export class SSEClient {
     reconnect,
   }) {
     this.closed = false;
+    this.closeController = new AbortController();
     const reconnectConfig = buildReconnectConfig(reconnect);
     this.currentRetryMs = reconnectConfig.initialDelayMs;
 
@@ -69,7 +92,10 @@ export class SSEClient {
         }
 
         onStatus?.({ state: 'reconnecting', sessionId, retryMs: this.currentRetryMs });
-        await sleep(this.currentRetryMs);
+        const shouldRetry = await sleep(this.currentRetryMs, { signal: this.closeController.signal });
+        if (!shouldRetry || this.closed) {
+          break;
+        }
         this.currentRetryMs = Math.min(this.currentRetryMs * 2, reconnectConfig.maxDelayMs);
       } catch (error) {
         if (this.closed) {
@@ -83,7 +109,10 @@ export class SSEClient {
         }
 
         onStatus?.({ state: 'reconnecting', sessionId, retryMs: this.currentRetryMs });
-        await sleep(this.currentRetryMs);
+        const shouldRetry = await sleep(this.currentRetryMs, { signal: this.closeController.signal });
+        if (!shouldRetry || this.closed) {
+          break;
+        }
         this.currentRetryMs = Math.min(this.currentRetryMs * 2, reconnectConfig.maxDelayMs);
       }
     }

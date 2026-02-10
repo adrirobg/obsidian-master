@@ -126,3 +126,55 @@ test('SSEClient emits normalized events with session_id and supports reconnectio
   assert.ok(statuses.some((s) => s.state === 'reconnecting'));
   assert.equal(statuses.at(-1).state, 'closed');
 });
+
+test('SSEClient flushes trailing event when stream closes without blank separator', async () => {
+  const fetchImpl = async () => {
+    const payload = 'event: end\ndata: {"status":"done"}\n';
+    return new Response(streamFromText([payload]), {
+      status: 200,
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  };
+
+  const normalized = [];
+  const client = new SSEClient({ fetchImpl, adapter: new RuntimeEventAdapter() });
+
+  await client.connect({
+    url: 'http://localhost:4096/sse/session/eof',
+    sessionId: 'session-eof',
+    reconnect: { enabled: false },
+    onNormalizedEvent: (event) => normalized.push(event),
+  });
+
+  assert.equal(normalized.length, 1);
+  assert.equal(normalized[0].type, 'end');
+});
+
+test('SSEClient close cancels reconnect delay immediately', async () => {
+  const fetchImpl = async () => new Response(streamFromText(['event: start\ndata: {"status":"started"}\n\n']), {
+    status: 200,
+    headers: { 'content-type': 'text/event-stream' },
+  });
+
+  const statuses = [];
+  const client = new SSEClient({ fetchImpl, adapter: new RuntimeEventAdapter() });
+
+  const startedAt = Date.now();
+  const connectPromise = client.connect({
+    url: 'http://localhost:4096/sse/session/backoff',
+    sessionId: 'session-backoff',
+    reconnect: { enabled: true, initialDelayMs: 1000, maxDelayMs: 1000 },
+    onStatus: (status) => {
+      statuses.push(status);
+      if (status.state === 'reconnecting') {
+        client.close();
+      }
+    },
+  });
+
+  await connectPromise;
+  const elapsedMs = Date.now() - startedAt;
+
+  assert.ok(elapsedMs < 500, `expected reconnect cancellation under 500ms, got ${elapsedMs}ms`);
+  assert.equal(statuses.at(-1).state, 'closed');
+});
