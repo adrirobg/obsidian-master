@@ -79,6 +79,33 @@ test("soporta TTL opcional para expiracion de sesion", () => {
   assert.equal(manager.isExpired(1000), true);
 });
 
+test("reinicia estado al iniciar una nueva sesion activa", () => {
+  const manager = new SessionStateManager();
+  manager.startSession("a", 0);
+  manager.addMessage(
+    { id: "m1", role: "user", content: "primera", timestamp: 1 },
+    1
+  );
+  manager.addSuggestion(
+    {
+      id: "sg-1",
+      title: "Sugerencia 1",
+      payload: "payload",
+      status: "pending",
+      createdAt: 2,
+    },
+    2
+  );
+
+  manager.startSession("b", 3);
+  const snapshot = manager.getSnapshot();
+
+  assert.equal(snapshot.metadata.sessionId, "b");
+  assert.equal(snapshot.metadata.startedAt, 3);
+  assert.equal(snapshot.history.length, 0);
+  assert.equal(snapshot.pendingSuggestions.length, 0);
+});
+
 test("errores en limpieza no bloquean reinicio de sesion", () => {
   const manager = new SessionStateManager();
   manager.startSession("s-3", 0);

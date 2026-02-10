@@ -73,6 +73,11 @@ class SessionStateManager {
     if (!sessionId || typeof sessionId !== "string") {
       throw new Error("sessionId must be a non-empty string");
     }
+
+    if (this.state.metadata.sessionId !== null) {
+      this._resetState();
+    }
+
     this.state.metadata.sessionId = sessionId;
     this.state.metadata.startedAt = now;
     this.state.metadata.lastActivityAt = now;
