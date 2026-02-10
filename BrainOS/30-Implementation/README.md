@@ -2,8 +2,12 @@
 
 Código de implementación de BrainOS.
 
-Estado actual: pendiente de inicio.
+Estado actual: en preparación de entregables MVP.
 
-Primer objetivo:
+Entregables actuales:
+
+- [MVP-04: Procesar nota actual con confirmación](MVP-04-PROCESAR-NOTA-ACTUAL.md)
+
+Objetivo inmediato:
 
 - Plugin Obsidian -> OpenCode (`opencode serve`) con flujo HTTP + SSE.
