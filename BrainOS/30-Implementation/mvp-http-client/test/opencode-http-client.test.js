@@ -101,6 +101,28 @@ test('maps timeout to OpenCodeTimeoutError', async () => {
   })
 })
 
+test('timeout is enforced for fetch implementations that wait on abort signal', async () => {
+  const fetchImpl = async (_url, options) => {
+    await new Promise((resolve) => {
+      options.signal.addEventListener('abort', resolve, { once: true })
+    })
+    const abortError = new Error('aborted')
+    abortError.name = 'AbortError'
+    throw abortError
+  }
+
+  const client = new OpenCodeHttpClient({
+    baseUrl: 'http://runtime.test',
+    timeoutMs: 20,
+    fetchImpl
+  })
+
+  await assert.rejects(() => client.healthCheck(), (error) => {
+    assert.equal(error instanceof OpenCodeTimeoutError, true)
+    return true
+  })
+})
+
 test('maps connection failures to OpenCodeNetworkError', async () => {
   const fetchImpl = async () => {
     throw new TypeError('fetch failed')
@@ -116,4 +138,34 @@ test('maps connection failures to OpenCodeNetworkError', async () => {
     assert.equal(error instanceof OpenCodeNetworkError, true)
     return true
   })
+})
+
+test('failure logs keep event message key stable', async () => {
+  const entries = []
+  const logger = {
+    info() {},
+    error(message, context) {
+      entries.push({ message, context })
+    }
+  }
+
+  const fetchImpl = async () => {
+    throw new TypeError('fetch failed')
+  }
+
+  const client = new OpenCodeHttpClient({
+    baseUrl: 'http://runtime.test',
+    timeoutMs: 100,
+    fetchImpl,
+    logger
+  })
+
+  await assert.rejects(() => client.healthCheck(), (error) => {
+    assert.equal(error instanceof OpenCodeNetworkError, true)
+    return true
+  })
+
+  assert.equal(entries.length, 1)
+  assert.equal(entries[0].message, 'opencode.request.failure')
+  assert.equal(entries[0].context.errorMessage, 'Failed to connect to OpenCode runtime')
 })

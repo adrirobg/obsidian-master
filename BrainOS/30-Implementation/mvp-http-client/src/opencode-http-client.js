@@ -60,7 +60,11 @@ export class OpenCodeHttpClient {
     const url = `${this.baseUrl}${path}`
     const startedAt = Date.now()
     const headers = body ? { 'content-type': 'application/json' } : undefined
-    const signal = AbortSignal.timeout(this.timeoutMs)
+    const timeoutController = new AbortController()
+    const timeoutId = setTimeout(() => {
+      timeoutController.abort()
+    }, this.timeoutMs)
+    const { signal } = timeoutController
 
     this.logger.info('opencode.request.start', { method, path, timeoutMs: this.timeoutMs })
 
@@ -97,10 +101,12 @@ export class OpenCodeHttpClient {
         path,
         durationMs: Date.now() - startedAt,
         code: wrappedError.code,
-        message: wrappedError.message,
+        errorMessage: wrappedError.message,
         status: wrappedError.status
       })
       throw wrappedError
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
