@@ -6,7 +6,11 @@ Estado actual:
 
 - `mvp-http-client/`: cliente HTTP mínimo para `opencode serve` (issue #1).
 
-Primer objetivo:
+Entregables actuales:
+
+- [MVP-04: Procesar nota actual con confirmación](MVP-04-PROCESAR-NOTA-ACTUAL.md)
+
+Objetivo inmediato:
 
 - Plugin Obsidian -> OpenCode (`opencode serve`) con flujo HTTP + SSE.
 
