@@ -44,6 +44,9 @@ export function transitionReviewModel(model, event) {
       return next;
     }
     case "RUNTIME_READY": {
+      if (next.status !== "processing") {
+        return next;
+      }
       next.status = "ready";
       next.suggestionContent = ensureString(event.suggestionContent, "suggestionContent");
       next.errorMessage = "";

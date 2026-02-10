@@ -53,6 +53,23 @@ test("error de runtime muestra fallback sin perder control", () => {
   assert.equal(failed.originalContent, "BASE");
 });
 
+test("ignora runtime_ready tardio cuando ya no esta procesando", () => {
+  const model = createReviewModel({ originalContent: "BASE" });
+  const failed = transitionReviewModel(
+    transitionReviewModel(model, { type: "START_PROCESSING" }),
+    { type: "RUNTIME_ERROR", message: "Sin conexion" },
+  );
+
+  const staleReady = transitionReviewModel(failed, {
+    type: "RUNTIME_READY",
+    suggestionContent: "CAMBIO TARDIO",
+  });
+
+  assert.equal(staleReady.status, "error");
+  assert.equal(staleReady.errorMessage, "Sin conexion");
+  assert.equal(staleReady.suggestionContent, "");
+});
+
 test("cancelar deja resultado controlado por usuario", () => {
   const model = createReviewModel({ originalContent: "BASE" });
 
