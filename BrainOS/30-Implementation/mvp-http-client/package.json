@@ -1,0 +1,11 @@
+{
+  "name": "@brainos/mvp-http-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal HTTP client for BrainOS MVP against opencode serve",
+  "scripts": {
+    "test": "node --test",
+    "smoke": "node scripts/smoke-http-client.js"
+  }
+}
