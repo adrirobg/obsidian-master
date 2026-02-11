@@ -75,7 +75,7 @@ function categorize(eventType: string): RuntimeEventCategory {
 	if (eventType === 'error' || eventType.endsWith('.error')) {
 		return 'error';
 	}
-	if (eventType.startsWith('message.')) {
+	if (eventType === 'message' || eventType.startsWith('message.')) {
 		return 'message';
 	}
 	if (eventType.startsWith('session.')) {
