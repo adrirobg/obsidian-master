@@ -8,7 +8,7 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"typecheck": "tsc -noEmit -skipLibCheck",
-		"test": "node --test src/runtime/auth-header.test.mjs src/runtime/runtime-event-adapter.test.mjs src/runtime/sse-parser.test.mjs src/runtime/runtime-bridge.test.mjs src/runtime/session-state-manager.test.mjs version-bump.test.mjs",
+		"test": "node --test src/runtime/auth-header.test.mjs src/runtime/runtime-event-adapter.test.mjs src/runtime/sse-parser.test.mjs src/runtime/runtime-bridge.test.mjs src/runtime/session-state-manager.test.mjs src/inbox-batch.test.mjs version-bump.test.mjs",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint ."
 	},

@@ -1,6 +1,7 @@
 /* eslint-disable obsidianmd/ui/sentence-case, obsidianmd/settings-tab/no-problematic-settings-headings */
 import { App, PluginSettingTab, SecretComponent, Setting } from 'obsidian';
 import BrainOSPlugin from './main';
+import { DEFAULT_BATCH_SIZE, MAX_BATCH_SIZE, MIN_BATCH_SIZE, normalizeBatchSize } from './inbox-batch';
 
 export interface RuntimeAuthSettings {
 	username: string;
@@ -15,7 +16,7 @@ export interface BrainOSPluginSettings {
 
 export const DEFAULT_SETTINGS: BrainOSPluginSettings = {
 	runtimeBaseUrl: 'http://localhost:4096',
-	batchSize: 5,
+	batchSize: DEFAULT_BATCH_SIZE,
 	auth: null
 };
 
@@ -51,15 +52,15 @@ export class BrainOSSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Batch size')
-			.setDesc('Reserved for runtime batch processing commands (MVP setting persistence).')
+			.setDesc(`Items to process in Process Inbox Batch (MVP safe range ${MIN_BATCH_SIZE}-${MAX_BATCH_SIZE}).`)
 			.addText((text) =>
 				text
 					.setPlaceholder(String(DEFAULT_SETTINGS.batchSize))
 					.setValue(String(this.plugin.settings.batchSize))
 					.onChange(async (value) => {
 						const parsed = Number.parseInt(value, 10);
-						if (Number.isInteger(parsed) && parsed > 0) {
-							this.plugin.settings.batchSize = parsed;
+						if (Number.isInteger(parsed)) {
+							this.plugin.settings.batchSize = normalizeBatchSize(parsed);
 							await this.plugin.saveSettings();
 						}
 					})
