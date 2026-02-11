@@ -17,6 +17,14 @@ export type OpenCodeHttpClientOptions = {
 	fetchImpl?: typeof fetch;
 };
 
+export type RuntimePermissionAction = 'allow' | 'deny' | 'ask';
+
+export type RuntimePermissionRule = {
+	permission: string;
+	pattern: string;
+	action: RuntimePermissionAction;
+};
+
 export class OpenCodeHttpClient {
 	private baseUrl: string;
 	private timeoutMs: number;
@@ -39,11 +47,17 @@ export class OpenCodeHttpClient {
 		return this.request({ method: 'GET', path: '/global/health' });
 	}
 
-	async createSession(title = 'BrainOS Session'): Promise<unknown> {
+	async createSession({
+		title = 'BrainOS Session',
+		permission
+	}: {
+		title?: string;
+		permission?: RuntimePermissionRule[];
+	} = {}): Promise<unknown> {
 		return this.request({
 			method: 'POST',
 			path: '/session',
-			body: { title }
+			body: permission ? { title, permission } : { title }
 		});
 	}
 
@@ -60,13 +74,37 @@ export class OpenCodeHttpClient {
 			});
 		}
 
-		return this.request({
-			method: 'POST',
-			path: `/session/${encodeURIComponent(sessionId)}/prompt`,
-			body: {
-				parts: [{ type: 'text', text: prompt }]
+		const body = {
+			parts: [{ type: 'text', text: prompt }]
+		};
+		const encodedSessionId = encodeURIComponent(sessionId);
+		const primaryPath = `/session/${encodedSessionId}/message`;
+		const legacyPath = `/session/${encodedSessionId}/prompt`;
+
+		try {
+			return await this.request({
+				method: 'POST',
+				path: primaryPath,
+				body
+			});
+		} catch (error) {
+			if (!(error instanceof OpenCodeRuntimeError) || error.status !== 404) {
+				throw error;
 			}
-		});
+
+			this.logger.warn('opencode.request.fallback', {
+				operation: 'sendPrompt',
+				fromPath: primaryPath,
+				toPath: legacyPath,
+				reason: 'primary_endpoint_404'
+			});
+
+			return this.request({
+				method: 'POST',
+				path: legacyPath,
+				body
+			});
+		}
 	}
 
 	private async request({ method, path, body }: RequestOptions): Promise<unknown> {

@@ -1,4 +1,9 @@
-export { OpenCodeHttpClient, type OpenCodeHttpClientOptions } from './opencode-http-client';
+export {
+	OpenCodeHttpClient,
+	type OpenCodeHttpClientOptions,
+	type RuntimePermissionAction,
+	type RuntimePermissionRule
+} from './opencode-http-client';
 export {
 	OpenCodeClientError,
 	OpenCodeNetworkError,

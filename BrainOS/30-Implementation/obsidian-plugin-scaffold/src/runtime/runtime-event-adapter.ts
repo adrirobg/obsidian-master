@@ -54,6 +54,14 @@ function extractSessionId(payload: Record<string, unknown>): string | null {
 		return direct;
 	}
 
+	const part = readRecord(properties.part);
+	if (part) {
+		const partSession = readString(part.sessionID) ?? readString(part.sessionId);
+		if (partSession) {
+			return partSession;
+		}
+	}
+
 	const info = readRecord(properties.info);
 	if (!info) {
 		return null;

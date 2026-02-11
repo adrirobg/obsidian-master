@@ -4,6 +4,7 @@ import {
 	OpenCodeHttpClient,
 	RuntimeBridge,
 	type RuntimeNormalizedEvent,
+	type RuntimePermissionRule,
 	type RuntimeStreamStatus,
 	type RuntimeStreamSubscription,
 	SessionStateManager
@@ -31,6 +32,8 @@ type InboxBatchSummary = {
 	rejected: number;
 	errors: number;
 };
+
+const RUNTIME_REQUEST_TIMEOUT_MS = 300_000;
 
 export default class BrainOSPlugin extends Plugin {
 	settings: BrainOSPluginSettings = DEFAULT_SETTINGS;
@@ -130,6 +133,7 @@ export default class BrainOSPlugin extends Plugin {
 	private initializeRuntimeBridge(): void {
 		this.runtimeBridge = new RuntimeBridge({
 			baseUrl: this.settings.runtimeBaseUrl,
+			timeoutMs: RUNTIME_REQUEST_TIMEOUT_MS,
 			fetchImpl: this.createRuntimeFetch(),
 			streamFetchImpl: this.createRuntimeStreamFetch(),
 			logger: this.runtimeLogger,
@@ -182,7 +186,9 @@ export default class BrainOSPlugin extends Plugin {
 		this.activeRuntimeStreams.clear();
 
 		try {
-			const sessionId = await bridge.createSession('BrainOS Runtime Smoke Test');
+				const sessionId = await bridge.createSession('BrainOS Runtime Smoke Test', {
+					permission: this.createRuntimeGuardrailPermissions()
+				});
 			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
 			if (cleanupErrors.length > 0) {
 				this.runtimeLogger.warn('runtime.session.cleanup-errors', { cleanupErrors });
@@ -244,7 +250,9 @@ export default class BrainOSPlugin extends Plugin {
 		let sessionId = '';
 
 		try {
-			sessionId = await bridge.createSession(`BrainOS Process Current Note: ${activeFile.path}`);
+			sessionId = await bridge.createSession(`BrainOS Process Current Note: ${activeFile.path}`, {
+				permission: this.createRuntimeGuardrailPermissions()
+			});
 			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
 			if (cleanupErrors.length > 0) {
 				this.runtimeLogger.warn('runtime.current-note.cleanup-errors', {
@@ -312,7 +320,9 @@ export default class BrainOSPlugin extends Plugin {
 		let sessionId = '';
 
 		try {
-			sessionId = await bridge.createSession(`BrainOS Process Inbox Batch (${summary.total})`);
+				sessionId = await bridge.createSession(`BrainOS Process Inbox Batch (${summary.total})`, {
+					permission: this.createRuntimeGuardrailPermissions()
+				});
 			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
 			if (cleanupErrors.length > 0) {
 				this.runtimeLogger.warn('runtime.inbox-batch.cleanup-errors', {
@@ -416,9 +426,9 @@ export default class BrainOSPlugin extends Plugin {
 				rejectCompletion?.(new Error(message));
 			};
 
-			stream = bridge.subscribeToSession({
-				sessionId,
-				reconnect: { enabled: false },
+				stream = bridge.subscribeToSession({
+					sessionId,
+					reconnect: { enabled: false },
 				onStatus: (status) => {
 					this.handleRuntimeStreamStatus(status);
 					if (status.state === 'error') {
@@ -429,31 +439,30 @@ export default class BrainOSPlugin extends Plugin {
 						settleSuccess();
 					}
 				},
-				onEvent: (event) => {
-					if (event.category === 'error') {
-						settleFailure(`runtime event error (${event.eventType})`);
-						return;
-					}
-
-					if (event.category === 'session') {
-						if (event.eventType === 'session.error') {
-							settleFailure('runtime session ended with error');
+					onEvent: (event) => {
+						if (event.category === 'error') {
+							settleFailure(`runtime event error (${event.eventType})`);
 							return;
 						}
-						if (event.eventType === 'session.idle') {
-							settleSuccess();
+
+						if (event.category === 'session') {
+							if (event.eventType === 'session.error') {
+								settleFailure('runtime session ended with error');
+								return;
+							}
+							if (event.eventType === 'session.idle') {
+								settleSuccess();
+								return;
+							}
+						}
+						if (event.category !== 'message') {
 							return;
 						}
-					}
 
-					if (event.category !== 'message') {
-						return;
-					}
-
-					const content = this.extractMessageContent(event);
-					if (!content) {
-						return;
-					}
+						const content = this.extractMessageContent(event);
+						if (!content) {
+							return;
+						}
 
 					suggestionBuffer += content;
 					this.sessionStateManager.addMessage({
@@ -478,15 +487,36 @@ export default class BrainOSPlugin extends Plugin {
 
 			const prompt = this.buildCurrentNotePrompt(file.path, originalContent);
 			await bridge.sendPrompt(sessionId, prompt);
-			await Promise.race([
-				streamCompletion,
-				this.timeoutAfter(60_000, `runtime stream timeout while processing ${file.path}`)
-			]);
+				let timedOut = false;
+				try {
+					await Promise.race([
+						streamCompletion,
+						this.timeoutAfter(60_000, `runtime stream timeout while processing ${file.path}`)
+					]);
+				} catch (error) {
+					const message = error instanceof Error ? error.message : String(error);
+					const hasSuggestion = suggestionBuffer.trim().length > 0;
+					if (!hasSuggestion) {
+						throw error;
+					}
+					timedOut = true;
+					this.runtimeLogger.warn('runtime.stream.timeout-with-partial-output', {
+						sessionId,
+						notePath: file.path,
+						error: message
+					});
+				}
 
-			const suggestedContent = suggestionBuffer.trim();
-			if (!suggestedContent) {
-				throw new Error(`Runtime no devolvió propuesta para revisar en ${file.path}.`);
-			}
+				const suggestedContent = suggestionBuffer.trim();
+				if (!suggestedContent) {
+					throw new Error(`Runtime no devolvió propuesta para revisar en ${file.path}.`);
+				}
+				if (timedOut) {
+					this.updateRuntimeStatus(`${statusPrefix}:review-timeout-fallback`);
+					new Notice(
+						'Se alcanzó timeout de streaming; se abrirá revisión con salida parcial recibida.'
+					);
+				}
 
 			const suggestionId = `${statusPrefix}:${sessionId}:${Date.now()}`;
 			this.sessionStateManager.addSuggestion({
@@ -568,7 +598,15 @@ export default class BrainOSPlugin extends Plugin {
 					eventType: event.eventType
 				});
 				break;
-		}
+			}
+	}
+
+	private createRuntimeGuardrailPermissions(): RuntimePermissionRule[] {
+		return [
+			{ permission: 'edit', pattern: '*', action: 'deny' },
+			{ permission: 'bash', pattern: '*', action: 'deny' },
+			{ permission: 'webfetch', pattern: '*', action: 'deny' }
+		];
 	}
 
 	private buildCurrentNotePrompt(notePath: string, originalContent: string): string {
@@ -628,12 +666,26 @@ export default class BrainOSPlugin extends Plugin {
 
 	private extractMessageContent(event: RuntimeNormalizedEvent): string | null {
 		const payload = event.payload;
-		const text = this.readNestedString(payload, ['properties', 'delta'])
+		const delta = this.readNestedString(payload, ['properties', 'delta'])
+			?? this.readNestedString(payload, ['properties', 'part', 'delta'])
+			?? this.readNestedString(payload, ['delta'])
+			?? this.readNestedString(payload, ['data', 'delta']);
+		if (delta && delta.length > 0) {
+			return delta;
+		}
+
+		if (event.eventType === 'message.part.updated') {
+			return null;
+		}
+
+		const text = this.readNestedString(payload, ['properties', 'part', 'text'])
 			?? this.readNestedString(payload, ['properties', 'text'])
 			?? this.readNestedString(payload, ['properties', 'message'])
 			?? this.readNestedString(payload, ['properties', 'info', 'text'])
 			?? this.readNestedString(payload, ['properties', 'info', 'content'])
-			?? this.readNestedString(payload, ['text']);
+			?? this.readNestedString(payload, ['text'])
+			?? this.readNestedString(payload, ['data', 'text'])
+			?? this.readNestedString(payload, ['data', 'content']);
 		return text && text.trim().length > 0 ? text : null;
 	}
 

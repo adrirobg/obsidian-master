@@ -57,3 +57,12 @@ BrainOS/30-Implementation/mvp-canvas-fallback/smoke/run-smoke.sh
 2. Integrar `SessionStateManager` y `mvp-review-ui` en flujo de nota actual.
 3. Integrar `mvp-canvas-fallback` detrás de confirmación explícita.
 4. Ejecutar validación metodológica en vault real y registrar fricciones.
+
+## Cierre fase 2 (issue #22)
+
+- `NEXT-BLOCK-PLUGIN-RUNTIME-PLAN.md`
+  runbook final de validacion tecnica + metodologica y gate GO/NO-GO.
+- `NEXT-BLOCK-EXECUTION-CHECKLIST.md`
+  checklist operativa para Flujo A y Flujo B (nominal + error) con evidencia.
+- `NEXT-BLOCK-MANUAL-REPORT-TEMPLATE.md`
+  plantilla para reporte de ejecucion manual en Obsidian real por supervisor.

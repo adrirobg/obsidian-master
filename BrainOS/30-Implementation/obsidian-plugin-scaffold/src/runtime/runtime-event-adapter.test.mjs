@@ -33,3 +33,25 @@ test('keeps unknown events as unknown without throwing', () => {
 	assert.equal(normalized.category, 'unknown');
 	assert.equal(normalized.sessionId, 'session-1');
 });
+
+test('extracts session id from message part payloads', () => {
+	const adapter = new RuntimeEventAdapter();
+	const normalized = adapter.normalize({
+		eventName: 'message.part.updated',
+		data: JSON.stringify({
+			type: 'message.part.updated',
+			properties: {
+				part: {
+					sessionID: 'session-from-part',
+					type: 'text',
+					text: 'hola'
+				}
+			}
+		}),
+		id: 'evt-3',
+		receivedAt: '2026-02-11T00:00:02.000Z'
+	});
+
+	assert.equal(normalized.sessionId, 'session-from-part');
+	assert.equal(normalized.category, 'message');
+});

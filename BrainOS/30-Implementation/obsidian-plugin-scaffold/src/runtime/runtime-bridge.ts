@@ -1,4 +1,4 @@
-import { OpenCodeHttpClient } from './opencode-http-client';
+import { OpenCodeHttpClient, type RuntimePermissionRule } from './opencode-http-client';
 import { OpenCodeRuntimeError } from './errors';
 import { createStructuredLogger, type RuntimeLogger } from './logger';
 import { RuntimeEventAdapter, type RuntimeNormalizedEvent } from './runtime-event-adapter';
@@ -169,9 +169,15 @@ export class RuntimeBridge {
 		return client.healthCheck();
 	}
 
-	async createSession(title = 'BrainOS Session'): Promise<string> {
+	async createSession(
+		title = 'BrainOS Session',
+		options: { permission?: RuntimePermissionRule[] } = {}
+	): Promise<string> {
 		const client = this.createHttpClient();
-		const response = await client.createSession(title);
+		const response = await client.createSession({
+			title,
+			permission: options.permission
+		});
 		const sessionId = extractSessionId(response);
 		if (!sessionId) {
 			throw new OpenCodeRuntimeError('OpenCode create session response did not include session id', {
