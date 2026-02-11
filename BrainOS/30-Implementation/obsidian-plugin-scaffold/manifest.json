@@ -1,0 +1,10 @@
+{
+	"id": "brainos-runtime-scaffold",
+	"name": "BrainOS Runtime Scaffold",
+	"version": "1.0.0",
+	"minAppVersion": "1.11.4",
+	"description": "MVP plugin scaffold for BrainOS runtime contract (HTTP health check + persistent settings).",
+	"author": "BrainOS",
+	"authorUrl": "https://github.com/adrirobg/obsidian-master",
+	"isDesktopOnly": false
+}
