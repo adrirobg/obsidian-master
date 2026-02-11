@@ -8,6 +8,7 @@ import {
 	type RuntimeStreamSubscription,
 	SessionStateManager
 } from './runtime';
+import { CurrentNoteReviewModal } from './review-modal';
 import { resolveBasicAuthHeader } from './runtime/auth-header.js';
 import {
 	BrainOSPluginSettings,
@@ -30,6 +31,7 @@ export default class BrainOSPlugin extends Plugin {
 	private sessionStateManager = new SessionStateManager();
 	private readonly runtimeLogger = createStructuredLogger();
 	private readonly activeRuntimeStreams = new Map<string, RuntimeStreamSubscription>();
+	private processingCurrentNote = false;
 
 	async onload() {
 		if (!requireApiVersion('1.11.4')) {
@@ -62,6 +64,14 @@ export default class BrainOSPlugin extends Plugin {
 				void this.runRuntimeSessionSmokeTest();
 			}
 		});
+		this.addCommand({
+			id: 'brainos-process-current-note',
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			name: 'BrainOS: Procesar nota actual',
+			callback: () => {
+				void this.runProcessCurrentNote();
+			}
+		});
 	}
 
 	onunload() {
@@ -74,6 +84,7 @@ export default class BrainOSPlugin extends Plugin {
 			stream.close();
 		}
 		this.activeRuntimeStreams.clear();
+		this.processingCurrentNote = false;
 
 		if (this.runtimeBridge) {
 			this.runtimeBridge.shutdown();
@@ -189,6 +200,179 @@ export default class BrainOSPlugin extends Plugin {
 		}
 	}
 
+	private async runProcessCurrentNote() {
+		if (this.processingCurrentNote) {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			new Notice('BrainOS ya está procesando una nota. Espera a que termine.');
+			return;
+		}
+
+		const activeFile = this.app.workspace.getActiveFile();
+		if (!activeFile || activeFile.extension !== 'md') {
+			new Notice('Abre una nota Markdown activa antes de ejecutar este comando.');
+			return;
+		}
+
+		const originalContent = await this.app.vault.read(activeFile);
+		if (!originalContent.trim()) {
+			new Notice('La nota activa está vacía. No hay contenido para procesar.');
+			return;
+		}
+
+		this.processingCurrentNote = true;
+		this.updateRuntimeStatus(`current-note:${activeFile.path}:requesting`);
+		const bridge = this.getRuntimeBridge();
+		let sessionId = '';
+		let stream: RuntimeStreamSubscription | null = null;
+
+		try {
+			sessionId = await bridge.createSession(`BrainOS Process Current Note: ${activeFile.path}`);
+			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
+			if (cleanupErrors.length > 0) {
+				this.runtimeLogger.warn('runtime.current-note.cleanup-errors', {
+					sessionId,
+					cleanupErrors
+				});
+			}
+
+			let suggestionBuffer = '';
+			let settled = false;
+			let resolveCompletion: (() => void) | null = null;
+			let rejectCompletion: ((error: Error) => void) | null = null;
+			const streamCompletion = new Promise<void>((resolve, reject) => {
+				resolveCompletion = resolve;
+				rejectCompletion = reject;
+			});
+			const settleSuccess = () => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				resolveCompletion?.();
+			};
+			const settleFailure = (message: string) => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				rejectCompletion?.(new Error(message));
+			};
+
+			stream = bridge.subscribeToSession({
+				sessionId,
+				reconnect: { enabled: false },
+				onStatus: (status) => {
+					this.handleRuntimeStreamStatus(status);
+					if (status.state === 'error') {
+						settleFailure(status.error ?? 'runtime stream error');
+						return;
+					}
+					if (status.state === 'stream-ended' || status.state === 'closed') {
+						settleSuccess();
+					}
+				},
+				onEvent: (event) => {
+					if (event.category === 'error') {
+						settleFailure(`runtime event error (${event.eventType})`);
+						return;
+					}
+
+					if (event.category === 'session') {
+						if (event.eventType === 'session.error') {
+							settleFailure('runtime session ended with error');
+							return;
+						}
+						if (event.eventType === 'session.idle') {
+							settleSuccess();
+							return;
+						}
+					}
+
+					if (event.category !== 'message') {
+						return;
+					}
+
+					const content = this.extractMessageContent(event);
+					if (!content) {
+						return;
+					}
+
+					suggestionBuffer += content;
+					this.sessionStateManager.addMessage({
+						id: event.eventId ?? `${event.eventType}:${event.sequence}`,
+						role: 'assistant',
+						content,
+						timestamp: Date.now()
+					});
+
+					const progressLabel = this.trimForStatus(content);
+					this.updateRuntimeStatus(`current-note:${activeFile.path}:streaming:${progressLabel}`);
+				},
+				onIgnoredEvent: (event) => {
+					this.runtimeLogger.debug('runtime.current-note.ignored-event', {
+						sessionId,
+						eventType: event.eventType,
+						eventSessionId: event.sessionId
+					});
+				}
+			});
+			this.activeRuntimeStreams.set(sessionId, stream);
+
+			const prompt = this.buildCurrentNotePrompt(activeFile.path, originalContent);
+			await bridge.sendPrompt(sessionId, prompt);
+			await Promise.race([
+				streamCompletion,
+				this.timeoutAfter(60_000, 'runtime stream timeout while processing current note')
+			]);
+
+			const suggestedContent = suggestionBuffer.trim();
+			if (!suggestedContent) {
+				throw new Error('Runtime no devolvió propuesta para revisar.');
+			}
+
+			const suggestionId = `current-note:${sessionId}:${Date.now()}`;
+			this.sessionStateManager.addSuggestion({
+				id: suggestionId,
+				title: `Propuesta para ${activeFile.path}`,
+				payload: suggestedContent,
+				status: 'shown',
+				createdAt: Date.now()
+			});
+
+			const decision = await new CurrentNoteReviewModal(this.app, {
+				notePath: activeFile.path,
+				proposedContent: suggestedContent
+			}).openAndWait();
+			const decidedAt = Date.now();
+			if (decision === 'accepted') {
+				await this.app.vault.modify(activeFile, suggestedContent);
+				this.sessionStateManager.updateSuggestionStatus(suggestionId, 'accepted', decidedAt);
+				new Notice(`Cambios aplicados en ${activeFile.path}.`);
+			} else {
+				this.sessionStateManager.updateSuggestionStatus(suggestionId, 'rejected', decidedAt);
+				new Notice(`Propuesta rechazada para ${activeFile.path}.`);
+			}
+			this.sessionStateManager.registerDecision({
+				id: `${suggestionId}:decision:${decidedAt}`,
+				suggestionId,
+				notePath: activeFile.path,
+				decision,
+				decidedAt
+			});
+			this.updateRuntimeStatus(`current-note:${activeFile.path}:${decision}`);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			this.updateRuntimeStatus('current-note:failed');
+			new Notice(`BrainOS no pudo procesar la nota actual: ${message}`);
+		} finally {
+			stream?.close();
+			if (sessionId) {
+				this.activeRuntimeStreams.delete(sessionId);
+			}
+			this.processingCurrentNote = false;
+		}
+	}
+
 	private handleRuntimeEvent(sessionId: string, event: RuntimeNormalizedEvent): void {
 		if (event.sessionId !== sessionId) {
 			return;
@@ -229,6 +413,36 @@ export default class BrainOSPlugin extends Plugin {
 				});
 				break;
 		}
+	}
+
+	private buildCurrentNotePrompt(notePath: string, originalContent: string): string {
+		return [
+			'Eres un asistente que propone una version mejorada de una nota Markdown.',
+			'Responde solo con el contenido final completo en Markdown, sin explicaciones externas.',
+			`Nota objetivo: ${notePath}`,
+			'Reglas:',
+			'- Mantener idioma y contexto original.',
+			'- Mejorar claridad y estructura.',
+			'- No inventar hechos.',
+			'Contenido original:',
+			originalContent
+		].join('\n');
+	}
+
+	private trimForStatus(content: string, maxLength = 48): string {
+		const compact = content.replace(/\s+/g, ' ').trim();
+		if (compact.length <= maxLength) {
+			return compact;
+		}
+		return `${compact.slice(0, Math.max(0, maxLength - 3))}...`;
+	}
+
+	private timeoutAfter(ms: number, message: string): Promise<never> {
+		return new Promise((_, reject) => {
+			window.setTimeout(() => {
+				reject(new Error(message));
+			}, ms);
+		});
 	}
 
 	private handleRuntimeStreamStatus(status: RuntimeStreamStatus): void {
