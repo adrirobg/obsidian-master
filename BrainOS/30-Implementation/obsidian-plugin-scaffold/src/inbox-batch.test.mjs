@@ -8,6 +8,7 @@ const {
 	MAX_BATCH_SIZE,
 	MIN_BATCH_SIZE,
 	normalizeBatchSize,
+	partitionScannedInboxBatch,
 	pickOldestInboxBatch
 } = jiti('./inbox-batch.ts');
 
@@ -42,4 +43,22 @@ test('pickOldestInboxBatch keeps deterministic order with same ctime', () => {
 	];
 	const batch = pickOldestInboxBatch(files, 2);
 	assert.deepEqual(batch.map((file) => file.path), ['00-Inbox/a.md', '00-Inbox/b.md']);
+});
+
+test('partitionScannedInboxBatch excludes empty notes from the effective batch', () => {
+	const scanned = [
+		{ file: { path: '00-Inbox/001.md', stat: { ctime: 10 } }, content: 'real content' },
+		{ file: { path: '00-Inbox/002.md', stat: { ctime: 20 } }, content: '   \n  ' },
+		{ file: { path: '00-Inbox/003.md', stat: { ctime: 30 } }, content: '# title' }
+	];
+
+	const partitioned = partitionScannedInboxBatch(scanned);
+	assert.deepEqual(
+		partitioned.processable.map((item) => item.file.path),
+		['00-Inbox/001.md', '00-Inbox/003.md']
+	);
+	assert.deepEqual(
+		partitioned.skippedEmpty.map((file) => file.path),
+		['00-Inbox/002.md']
+	);
 });

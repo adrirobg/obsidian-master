@@ -10,7 +10,7 @@ import {
 } from './runtime';
 import { CurrentNoteReviewModal, type ReviewDecision } from './review-modal';
 import { resolveBasicAuthHeader } from './runtime/auth-header.js';
-import { normalizeBatchSize, pickOldestInboxBatch } from './inbox-batch';
+import { normalizeBatchSize, partitionScannedInboxBatch, pickOldestInboxBatch } from './inbox-batch';
 import {
 	BrainOSPluginSettings,
 	BrainOSSettingTab,
@@ -280,13 +280,28 @@ export default class BrainOSPlugin extends Plugin {
 		const batchSize = normalizeBatchSize(this.settings.batchSize);
 		const candidates = pickOldestInboxBatch(this.app.vault.getMarkdownFiles(), batchSize);
 		if (candidates.length === 0) {
-			new Notice('No hay notas Markdown en 00-Inbox para procesar.');
+			new Notice('No hay notas del inbox para procesar.');
 			return;
+		}
+
+		const scannedCandidates: Array<{ file: TFile; content: string }> = [];
+		for (const candidate of candidates) {
+			const content = await this.app.vault.read(candidate);
+			scannedCandidates.push({ file: candidate, content });
+		}
+		const { processable, skippedEmpty } = partitionScannedInboxBatch(scannedCandidates);
+		if (processable.length === 0) {
+			new Notice(`No hay notas con contenido para procesar en este lote (${skippedEmpty.length} vacías).`);
+			this.updateRuntimeStatus('inbox-batch:no-content');
+			return;
+		}
+		if (skippedEmpty.length > 0) {
+			new Notice(`Se omitieron ${skippedEmpty.length} notas vacías fuera del lote procesado.`);
 		}
 
 		this.processingInboxBatch = true;
 		const summary: InboxBatchSummary = {
-			total: candidates.length,
+			total: processable.length,
 			processed: 0,
 			accepted: 0,
 			rejected: 0,
@@ -306,17 +321,14 @@ export default class BrainOSPlugin extends Plugin {
 				});
 			}
 
-			for (const [index, file] of candidates.entries()) {
+			for (const [index, item] of processable.entries()) {
+				const file = item.file;
+				const originalContent = item.content;
 				const itemPosition = `${index + 1}/${summary.total}`;
 				const statusPrefix = `inbox-batch:${itemPosition}:${file.path}`;
 
 				try {
 					this.updateRuntimeStatus(`${statusPrefix}:running`);
-					const originalContent = await this.app.vault.read(file);
-					if (!originalContent.trim()) {
-						throw new Error('nota vacía, se omite del lote');
-					}
-
 					const decision = await this.processNoteWithExplicitDecision({
 						sessionId,
 						file,

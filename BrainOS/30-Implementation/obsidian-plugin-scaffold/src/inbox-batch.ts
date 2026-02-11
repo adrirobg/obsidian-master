@@ -10,6 +10,16 @@ export interface InboxCandidateLike {
 	};
 }
 
+export interface ScannedInboxItem<T extends InboxCandidateLike> {
+	file: T;
+	content: string;
+}
+
+export interface PartitionedInboxBatch<T extends InboxCandidateLike> {
+	processable: ScannedInboxItem<T>[];
+	skippedEmpty: T[];
+}
+
 function normalizeCtime(value: unknown): number {
 	return Number.isFinite(value) ? Number(value) : Number.POSITIVE_INFINITY;
 }
@@ -43,4 +53,21 @@ export function pickOldestInboxBatch<T extends InboxCandidateLike>(files: T[], b
 			return a.path.localeCompare(b.path);
 		})
 		.slice(0, normalizedBatchSize);
+}
+
+export function partitionScannedInboxBatch<T extends InboxCandidateLike>(
+	scannedItems: ScannedInboxItem<T>[]
+): PartitionedInboxBatch<T> {
+	const processable: ScannedInboxItem<T>[] = [];
+	const skippedEmpty: T[] = [];
+
+	for (const scanned of scannedItems) {
+		if (scanned.content.trim().length > 0) {
+			processable.push(scanned);
+			continue;
+		}
+		skippedEmpty.push(scanned.file);
+	}
+
+	return { processable, skippedEmpty };
 }
