@@ -1,4 +1,4 @@
-import { Notice, Plugin, requestUrl, requireApiVersion } from 'obsidian';
+import { Notice, Plugin, TFile, requestUrl, requireApiVersion } from 'obsidian';
 import {
 	createStructuredLogger,
 	OpenCodeHttpClient,
@@ -8,8 +8,9 @@ import {
 	type RuntimeStreamSubscription,
 	SessionStateManager
 } from './runtime';
-import { CurrentNoteReviewModal } from './review-modal';
+import { CurrentNoteReviewModal, type ReviewDecision } from './review-modal';
 import { resolveBasicAuthHeader } from './runtime/auth-header.js';
+import { normalizeBatchSize, partitionScannedInboxBatch, pickOldestInboxBatch } from './inbox-batch';
 import {
 	BrainOSPluginSettings,
 	BrainOSSettingTab,
@@ -23,6 +24,14 @@ type RuntimeHealthPayload = {
 	status?: string;
 };
 
+type InboxBatchSummary = {
+	total: number;
+	processed: number;
+	accepted: number;
+	rejected: number;
+	errors: number;
+};
+
 export default class BrainOSPlugin extends Plugin {
 	settings: BrainOSPluginSettings = DEFAULT_SETTINGS;
 	private statusBarItemEl: HTMLElement | null = null;
@@ -32,6 +41,7 @@ export default class BrainOSPlugin extends Plugin {
 	private readonly runtimeLogger = createStructuredLogger();
 	private readonly activeRuntimeStreams = new Map<string, RuntimeStreamSubscription>();
 	private processingCurrentNote = false;
+	private processingInboxBatch = false;
 
 	async onload() {
 		if (!requireApiVersion('1.11.4')) {
@@ -72,6 +82,14 @@ export default class BrainOSPlugin extends Plugin {
 				void this.runProcessCurrentNote();
 			}
 		});
+		this.addCommand({
+			id: 'brainos-process-inbox-batch',
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			name: 'BrainOS: Process Inbox Batch',
+			callback: () => {
+				void this.runProcessInboxBatch();
+			}
+		});
 	}
 
 	onunload() {
@@ -85,6 +103,7 @@ export default class BrainOSPlugin extends Plugin {
 		}
 		this.activeRuntimeStreams.clear();
 		this.processingCurrentNote = false;
+		this.processingInboxBatch = false;
 
 		if (this.runtimeBridge) {
 			this.runtimeBridge.shutdown();
@@ -201,9 +220,9 @@ export default class BrainOSPlugin extends Plugin {
 	}
 
 	private async runProcessCurrentNote() {
-		if (this.processingCurrentNote) {
+		if (this.processingCurrentNote || this.processingInboxBatch) {
 			// eslint-disable-next-line obsidianmd/ui/sentence-case
-			new Notice('BrainOS ya está procesando una nota. Espera a que termine.');
+			new Notice('BrainOS ya está ejecutando un procesamiento. Espera a que termine.');
 			return;
 		}
 
@@ -223,7 +242,6 @@ export default class BrainOSPlugin extends Plugin {
 		this.updateRuntimeStatus(`current-note:${activeFile.path}:requesting`);
 		const bridge = this.getRuntimeBridge();
 		let sessionId = '';
-		let stream: RuntimeStreamSubscription | null = null;
 
 		try {
 			sessionId = await bridge.createSession(`BrainOS Process Current Note: ${activeFile.path}`);
@@ -235,6 +253,146 @@ export default class BrainOSPlugin extends Plugin {
 				});
 			}
 
+			await this.processNoteWithExplicitDecision({
+				sessionId,
+				file: activeFile,
+				originalContent,
+				statusPrefix: `current-note:${activeFile.path}`,
+				ignoredLogKey: 'runtime.current-note.ignored-event',
+				showDecisionNotice: true
+			});
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			this.updateRuntimeStatus('current-note:failed');
+			new Notice(`BrainOS no pudo procesar la nota actual: ${message}`);
+		} finally {
+			this.processingCurrentNote = false;
+		}
+	}
+
+	private async runProcessInboxBatch() {
+		if (this.processingCurrentNote || this.processingInboxBatch) {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			new Notice('BrainOS ya está ejecutando un procesamiento. Espera a que termine.');
+			return;
+		}
+
+		const batchSize = normalizeBatchSize(this.settings.batchSize);
+		const candidates = pickOldestInboxBatch(this.app.vault.getMarkdownFiles(), batchSize);
+		if (candidates.length === 0) {
+			new Notice('No hay notas del inbox para procesar.');
+			return;
+		}
+
+		const scannedCandidates: Array<{ file: TFile; content: string }> = [];
+		for (const candidate of candidates) {
+			const content = await this.app.vault.read(candidate);
+			scannedCandidates.push({ file: candidate, content });
+		}
+		const { processable, skippedEmpty } = partitionScannedInboxBatch(scannedCandidates);
+		if (processable.length === 0) {
+			new Notice(`No hay notas con contenido para procesar en este lote (${skippedEmpty.length} vacías).`);
+			this.updateRuntimeStatus('inbox-batch:no-content');
+			return;
+		}
+		if (skippedEmpty.length > 0) {
+			new Notice(`Se omitieron ${skippedEmpty.length} notas vacías fuera del lote procesado.`);
+		}
+
+		this.processingInboxBatch = true;
+		const summary: InboxBatchSummary = {
+			total: processable.length,
+			processed: 0,
+			accepted: 0,
+			rejected: 0,
+			errors: 0
+		};
+		this.updateRuntimeStatus(`inbox-batch:0/${summary.total}:requesting-session`);
+		const bridge = this.getRuntimeBridge();
+		let sessionId = '';
+
+		try {
+			sessionId = await bridge.createSession(`BrainOS Process Inbox Batch (${summary.total})`);
+			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
+			if (cleanupErrors.length > 0) {
+				this.runtimeLogger.warn('runtime.inbox-batch.cleanup-errors', {
+					sessionId,
+					cleanupErrors
+				});
+			}
+
+			for (const [index, item] of processable.entries()) {
+				const file = item.file;
+				const originalContent = item.content;
+				const itemPosition = `${index + 1}/${summary.total}`;
+				const statusPrefix = `inbox-batch:${itemPosition}:${file.path}`;
+
+				try {
+					this.updateRuntimeStatus(`${statusPrefix}:running`);
+					const decision = await this.processNoteWithExplicitDecision({
+						sessionId,
+						file,
+						originalContent,
+						statusPrefix,
+						ignoredLogKey: 'runtime.inbox-batch.ignored-event',
+						showDecisionNotice: false
+					});
+
+					summary.processed += 1;
+					if (decision === 'accepted') {
+						summary.accepted += 1;
+					} else {
+						summary.rejected += 1;
+					}
+
+					new Notice(`Inbox batch ${itemPosition}: ${file.path} -> ${decision}.`);
+				} catch (error) {
+					const message = error instanceof Error ? error.message : String(error);
+					summary.processed += 1;
+					summary.errors += 1;
+					this.runtimeLogger.error('runtime.inbox-batch.item-error', {
+						sessionId,
+						notePath: file.path,
+						index: index + 1,
+						total: summary.total,
+						error: message
+					});
+					this.updateRuntimeStatus(`${statusPrefix}:error`);
+					new Notice(`Inbox batch ${itemPosition}: error en ${file.path}: ${message}`);
+				}
+			}
+
+			const summaryText = `processed=${summary.processed}/${summary.total} accepted=${summary.accepted} rejected=${summary.rejected} errors=${summary.errors}`;
+			this.updateRuntimeStatus(`inbox-batch:completed:${summaryText}`);
+			new Notice(`Inbox batch finalizado: ${summaryText}`);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			this.updateRuntimeStatus('inbox-batch:failed');
+			new Notice(`BrainOS no pudo iniciar Process Inbox Batch: ${message}`);
+		} finally {
+			this.processingInboxBatch = false;
+		}
+	}
+
+	private async processNoteWithExplicitDecision({
+		sessionId,
+		file,
+		originalContent,
+		statusPrefix,
+		ignoredLogKey,
+		showDecisionNotice
+	}: {
+		sessionId: string;
+		file: TFile;
+		originalContent: string;
+		statusPrefix: string;
+		ignoredLogKey: string;
+		showDecisionNotice: boolean;
+	}): Promise<ReviewDecision> {
+		const bridge = this.getRuntimeBridge();
+		let stream: RuntimeStreamSubscription | null = null;
+
+		try {
 			let suggestionBuffer = '';
 			let settled = false;
 			let resolveCompletion: (() => void) | null = null;
@@ -306,10 +464,10 @@ export default class BrainOSPlugin extends Plugin {
 					});
 
 					const progressLabel = this.trimForStatus(content);
-					this.updateRuntimeStatus(`current-note:${activeFile.path}:streaming:${progressLabel}`);
+					this.updateRuntimeStatus(`${statusPrefix}:streaming:${progressLabel}`);
 				},
 				onIgnoredEvent: (event) => {
-					this.runtimeLogger.debug('runtime.current-note.ignored-event', {
+					this.runtimeLogger.debug(ignoredLogKey, {
 						sessionId,
 						eventType: event.eventType,
 						eventSessionId: event.sessionId
@@ -318,58 +476,56 @@ export default class BrainOSPlugin extends Plugin {
 			});
 			this.activeRuntimeStreams.set(sessionId, stream);
 
-			const prompt = this.buildCurrentNotePrompt(activeFile.path, originalContent);
+			const prompt = this.buildCurrentNotePrompt(file.path, originalContent);
 			await bridge.sendPrompt(sessionId, prompt);
 			await Promise.race([
 				streamCompletion,
-				this.timeoutAfter(60_000, 'runtime stream timeout while processing current note')
+				this.timeoutAfter(60_000, `runtime stream timeout while processing ${file.path}`)
 			]);
 
 			const suggestedContent = suggestionBuffer.trim();
 			if (!suggestedContent) {
-				throw new Error('Runtime no devolvió propuesta para revisar.');
+				throw new Error(`Runtime no devolvió propuesta para revisar en ${file.path}.`);
 			}
 
-			const suggestionId = `current-note:${sessionId}:${Date.now()}`;
+			const suggestionId = `${statusPrefix}:${sessionId}:${Date.now()}`;
 			this.sessionStateManager.addSuggestion({
 				id: suggestionId,
-				title: `Propuesta para ${activeFile.path}`,
+				title: `Propuesta para ${file.path}`,
 				payload: suggestedContent,
 				status: 'shown',
 				createdAt: Date.now()
 			});
 
 			const decision = await new CurrentNoteReviewModal(this.app, {
-				notePath: activeFile.path,
+				notePath: file.path,
 				proposedContent: suggestedContent
 			}).openAndWait();
 			const decidedAt = Date.now();
 			if (decision === 'accepted') {
-				await this.app.vault.modify(activeFile, suggestedContent);
+				await this.app.vault.modify(file, suggestedContent);
 				this.sessionStateManager.updateSuggestionStatus(suggestionId, 'accepted', decidedAt);
-				new Notice(`Cambios aplicados en ${activeFile.path}.`);
+				if (showDecisionNotice) {
+					new Notice(`Cambios aplicados en ${file.path}.`);
+				}
 			} else {
 				this.sessionStateManager.updateSuggestionStatus(suggestionId, 'rejected', decidedAt);
-				new Notice(`Propuesta rechazada para ${activeFile.path}.`);
+				if (showDecisionNotice) {
+					new Notice(`Propuesta rechazada para ${file.path}.`);
+				}
 			}
 			this.sessionStateManager.registerDecision({
 				id: `${suggestionId}:decision:${decidedAt}`,
 				suggestionId,
-				notePath: activeFile.path,
+				notePath: file.path,
 				decision,
 				decidedAt
 			});
-			this.updateRuntimeStatus(`current-note:${activeFile.path}:${decision}`);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			this.updateRuntimeStatus('current-note:failed');
-			new Notice(`BrainOS no pudo procesar la nota actual: ${message}`);
+			this.updateRuntimeStatus(`${statusPrefix}:${decision}`);
+			return decision;
 		} finally {
 			stream?.close();
-			if (sessionId) {
-				this.activeRuntimeStreams.delete(sessionId);
-			}
-			this.processingCurrentNote = false;
+			this.activeRuntimeStreams.delete(sessionId);
 		}
 	}
 
@@ -638,9 +794,7 @@ export default class BrainOSPlugin extends Plugin {
 			? raw.runtimeBaseUrl.trim()
 			: DEFAULT_SETTINGS.runtimeBaseUrl;
 
-		const batchSize = Number.isInteger(raw.batchSize) && (raw.batchSize ?? 0) > 0
-			? raw.batchSize as number
-			: DEFAULT_SETTINGS.batchSize;
+		const batchSize = normalizeBatchSize(raw.batchSize, DEFAULT_SETTINGS.batchSize);
 
 		let auth: RuntimeAuthSettings | null = null;
 		if (raw.auth && typeof raw.auth === 'object') {
