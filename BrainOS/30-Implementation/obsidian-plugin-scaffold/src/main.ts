@@ -1,5 +1,13 @@
 import { Notice, Plugin, requestUrl, requireApiVersion } from 'obsidian';
-import { OpenCodeHttpClient } from './runtime';
+import {
+	createStructuredLogger,
+	OpenCodeHttpClient,
+	RuntimeBridge,
+	type RuntimeNormalizedEvent,
+	type RuntimeStreamStatus,
+	type RuntimeStreamSubscription,
+	SessionStateManager
+} from './runtime';
 import { resolveBasicAuthHeader } from './runtime/auth-header.js';
 import {
 	BrainOSPluginSettings,
@@ -18,6 +26,10 @@ export default class BrainOSPlugin extends Plugin {
 	settings: BrainOSPluginSettings = DEFAULT_SETTINGS;
 	private statusBarItemEl: HTMLElement | null = null;
 	private activeHealthChecks = new Set<AbortController>();
+	private runtimeBridge: RuntimeBridge | null = null;
+	private sessionStateManager = new SessionStateManager();
+	private readonly runtimeLogger = createStructuredLogger();
+	private readonly activeRuntimeStreams = new Map<string, RuntimeStreamSubscription>();
 
 	async onload() {
 		if (!requireApiVersion('1.11.4')) {
@@ -27,6 +39,8 @@ export default class BrainOSPlugin extends Plugin {
 		}
 
 		await this.loadSettings();
+		this.initializeRuntimeBridge();
+		this.sessionStateManager = new SessionStateManager();
 
 		this.statusBarItemEl = this.addStatusBarItem();
 		this.updateRuntimeStatus('idle');
@@ -40,6 +54,14 @@ export default class BrainOSPlugin extends Plugin {
 				void this.runRuntimeHealthCheck();
 			}
 		});
+		this.addCommand({
+			id: 'brainos-runtime-session-smoke-test',
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			name: 'BrainOS: Runtime Session Smoke Test',
+			callback: () => {
+				void this.runRuntimeSessionSmokeTest();
+			}
+		});
 	}
 
 	onunload() {
@@ -47,6 +69,18 @@ export default class BrainOSPlugin extends Plugin {
 			controller.abort();
 		}
 		this.activeHealthChecks.clear();
+
+		for (const stream of this.activeRuntimeStreams.values()) {
+			stream.close();
+		}
+		this.activeRuntimeStreams.clear();
+
+		if (this.runtimeBridge) {
+			this.runtimeBridge.shutdown();
+			this.runtimeBridge = null;
+		}
+
+		this.sessionStateManager.clearSession({ reason: 'plugin-unload' });
 
 		if (this.statusBarItemEl) {
 			this.statusBarItemEl.remove();
@@ -61,6 +95,24 @@ export default class BrainOSPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	private initializeRuntimeBridge(): void {
+		this.runtimeBridge = new RuntimeBridge({
+			baseUrl: this.settings.runtimeBaseUrl,
+			fetchImpl: this.createRuntimeFetch(),
+			streamFetchImpl: this.createRuntimeStreamFetch(),
+			logger: this.runtimeLogger,
+			buildAuthorizationHeader: async () => this.buildAuthorizationHeader(this.settings.auth)
+		});
+	}
+
+	private getRuntimeBridge(): RuntimeBridge {
+		if (!this.runtimeBridge) {
+			this.initializeRuntimeBridge();
+		}
+		this.runtimeBridge?.setBaseUrl(this.settings.runtimeBaseUrl);
+		return this.runtimeBridge as RuntimeBridge;
 	}
 
 	private async runRuntimeHealthCheck() {
@@ -90,7 +142,144 @@ export default class BrainOSPlugin extends Plugin {
 		}
 	}
 
-	private createRuntimeFetch(pluginSignal: AbortSignal): typeof fetch {
+	private async runRuntimeSessionSmokeTest() {
+		this.updateRuntimeStatus('session:connecting');
+		const bridge = this.getRuntimeBridge();
+
+		for (const stream of this.activeRuntimeStreams.values()) {
+			stream.close();
+		}
+		this.activeRuntimeStreams.clear();
+
+		try {
+			const sessionId = await bridge.createSession('BrainOS Runtime Smoke Test');
+			const { cleanupErrors } = this.sessionStateManager.restartSession(sessionId);
+			if (cleanupErrors.length > 0) {
+				this.runtimeLogger.warn('runtime.session.cleanup-errors', { cleanupErrors });
+			}
+
+			const subscription = bridge.subscribeToSession({
+				sessionId,
+				onStatus: (status) => {
+					this.handleRuntimeStreamStatus(status);
+				},
+				onEvent: (event) => {
+					this.handleRuntimeEvent(sessionId, event);
+				},
+				onIgnoredEvent: (event) => {
+					this.runtimeLogger.debug('runtime.stream.ignored-event', {
+						sessionId,
+						eventType: event.eventType,
+						eventSessionId: event.sessionId
+					});
+				}
+			});
+			this.activeRuntimeStreams.set(sessionId, subscription);
+
+			await bridge.sendPrompt(
+				sessionId,
+				'Resume en tres bullets las siguientes acciones sugeridas para organizar una nota de trabajo.'
+			);
+
+			new Notice(`BrainOS runtime session started (${sessionId}). Streaming incremental activo.`);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			this.updateRuntimeStatus('error');
+			new Notice(`BrainOS runtime session smoke test failed: ${message}`);
+		}
+	}
+
+	private handleRuntimeEvent(sessionId: string, event: RuntimeNormalizedEvent): void {
+		if (event.sessionId !== sessionId) {
+			return;
+		}
+
+		switch (event.category) {
+			case 'message': {
+				const content = this.extractMessageContent(event);
+				if (content) {
+					this.sessionStateManager.addMessage({
+						id: event.eventId ?? `${event.eventType}:${event.sequence}`,
+						role: 'assistant',
+						content,
+						timestamp: Date.now()
+					});
+				}
+				break;
+			}
+			case 'session':
+				if (event.eventType === 'session.idle') {
+					const stream = this.activeRuntimeStreams.get(sessionId);
+					stream?.close();
+					this.activeRuntimeStreams.delete(sessionId);
+					this.updateRuntimeStatus('session:idle');
+				}
+				break;
+			case 'error':
+				this.updateRuntimeStatus('session:error');
+				this.runtimeLogger.error('runtime.session.event-error', {
+					sessionId,
+					eventType: event.eventType
+				});
+				break;
+			default:
+				this.runtimeLogger.debug('runtime.session.unknown-event', {
+					sessionId,
+					eventType: event.eventType
+				});
+				break;
+		}
+	}
+
+	private handleRuntimeStreamStatus(status: RuntimeStreamStatus): void {
+		switch (status.state) {
+			case 'connecting':
+				this.updateRuntimeStatus(`session:${status.sessionId}:connecting`);
+				break;
+			case 'open':
+				this.updateRuntimeStatus(`session:${status.sessionId}:streaming`);
+				break;
+			case 'reconnecting':
+				this.updateRuntimeStatus(`session:${status.sessionId}:reconnecting`);
+				break;
+			case 'stream-ended':
+				this.updateRuntimeStatus(`session:${status.sessionId}:ended`);
+				break;
+			case 'error':
+				this.updateRuntimeStatus(`session:${status.sessionId}:error`);
+				break;
+			case 'closed':
+				this.updateRuntimeStatus(`session:${status.sessionId}:closed`);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private extractMessageContent(event: RuntimeNormalizedEvent): string | null {
+		const payload = event.payload;
+		const text = this.readNestedString(payload, ['properties', 'delta'])
+			?? this.readNestedString(payload, ['properties', 'text'])
+			?? this.readNestedString(payload, ['properties', 'message'])
+			?? this.readNestedString(payload, ['properties', 'info', 'text'])
+			?? this.readNestedString(payload, ['properties', 'info', 'content'])
+			?? this.readNestedString(payload, ['text']);
+		return text && text.trim().length > 0 ? text : null;
+	}
+
+	private readNestedString(input: Record<string, unknown>, path: string[]): string | null {
+		let cursor: unknown = input;
+		for (const key of path) {
+			if (!cursor || typeof cursor !== 'object') {
+				return null;
+			}
+			cursor = (cursor as Record<string, unknown>)[key];
+		}
+
+		return typeof cursor === 'string' ? cursor : null;
+	}
+
+	private createRuntimeFetch(pluginSignal?: AbortSignal): typeof fetch {
 		return async (input, init) => {
 			const authHeader = await this.buildAuthorizationHeader(this.settings.auth);
 			const headers = new Headers(init?.headers ?? {});
@@ -118,6 +307,27 @@ export default class BrainOSPlugin extends Plugin {
 			return new Response(response.text, {
 				status: response.status,
 				headers: new Headers(response.headers)
+			});
+		};
+	}
+
+	private createRuntimeStreamFetch(pluginSignal?: AbortSignal): typeof fetch {
+		return async (input, init) => {
+			const authHeader = await this.buildAuthorizationHeader(this.settings.auth);
+			const headers = new Headers(init?.headers ?? {});
+			if (authHeader) {
+				headers.set('authorization', authHeader);
+			}
+
+			const signal = this.combineAbortSignals(init?.signal, pluginSignal);
+			if (signal?.aborted) {
+				throw this.createAbortError();
+			}
+
+			return window.fetch(input, {
+				...init,
+				headers,
+				signal
 			});
 		};
 	}
