@@ -1,0 +1,1746 @@
+[
+  {
+    "command": "base:create",
+    "domain": "bases",
+    "params": [
+      "content",
+      "name"
+    ],
+    "flags": [
+      "newtab",
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "base:query",
+    "domain": "bases",
+    "params": [
+      "file",
+      "format",
+      "path",
+      "view"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "base:views",
+    "domain": "bases",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "bases",
+    "domain": "bases",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "bookmark",
+    "domain": "bookmarks",
+    "params": [
+      "file",
+      "folder",
+      "search",
+      "subpath",
+      "title",
+      "url"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "bookmarks",
+    "domain": "bookmarks",
+    "params": [],
+    "flags": [
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "command",
+    "domain": "commands",
+    "params": [
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "commands",
+    "domain": "commands",
+    "params": [
+      "filter"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "help",
+    "domain": "commands",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "hotkey",
+    "domain": "commands",
+    "params": [
+      "id"
+    ],
+    "flags": [
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "hotkeys",
+    "domain": "commands",
+    "params": [],
+    "flags": [
+      "all",
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "reload",
+    "domain": "commands",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "restart",
+    "domain": "commands",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "version",
+    "domain": "commands",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "daily",
+    "domain": "daily",
+    "params": [
+      "paneType"
+    ],
+    "flags": [
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "daily:append",
+    "domain": "daily",
+    "params": [
+      "content",
+      "paneType"
+    ],
+    "flags": [
+      "inline",
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "daily:prepend",
+    "domain": "daily",
+    "params": [
+      "content",
+      "paneType"
+    ],
+    "flags": [
+      "inline",
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "daily:read",
+    "domain": "daily",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:cdp",
+    "domain": "developer",
+    "params": [
+      "method",
+      "params"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:console",
+    "domain": "developer",
+    "params": [
+      "level",
+      "limit"
+    ],
+    "flags": [
+      "clear"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:css",
+    "domain": "developer",
+    "params": [
+      "prop",
+      "selector"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:debug",
+    "domain": "developer",
+    "params": [],
+    "flags": [
+      "off",
+      "on"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:dom",
+    "domain": "developer",
+    "params": [
+      "attr",
+      "css",
+      "selector"
+    ],
+    "flags": [
+      "all",
+      "inner",
+      "text",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:errors",
+    "domain": "developer",
+    "params": [],
+    "flags": [
+      "clear"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:mobile",
+    "domain": "developer",
+    "params": [],
+    "flags": [
+      "off",
+      "on"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "dev:screenshot",
+    "domain": "developer",
+    "params": [
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "devtools",
+    "domain": "developer",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "eval",
+    "domain": "developer",
+    "params": [
+      "code"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "aliases",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "all",
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "append",
+    "domain": "files_folders",
+    "params": [
+      "content",
+      "file",
+      "path"
+    ],
+    "flags": [
+      "inline"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "create",
+    "domain": "files_folders",
+    "params": [
+      "content",
+      "name",
+      "path",
+      "template"
+    ],
+    "flags": [
+      "newtab",
+      "overwrite",
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "delete",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "permanent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "diff",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "filter",
+      "from",
+      "path",
+      "to"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "file",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "files",
+    "domain": "files_folders",
+    "params": [
+      "ext",
+      "folder"
+    ],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "folder",
+    "domain": "files_folders",
+    "params": [
+      "info",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "folders",
+    "domain": "files_folders",
+    "params": [
+      "folder"
+    ],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "history",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "history:list",
+    "domain": "files_folders",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "history:open",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "history:read",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path",
+      "version"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "history:restore",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path",
+      "version"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "move",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path",
+      "to"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "open",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "newtab"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "outline",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "format",
+      "path"
+    ],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "prepend",
+    "domain": "files_folders",
+    "params": [
+      "content",
+      "file",
+      "path"
+    ],
+    "flags": [
+      "inline"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "properties",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "format",
+      "name",
+      "path",
+      "sort"
+    ],
+    "flags": [
+      "all",
+      "counts",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "property:read",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "name",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "property:remove",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "name",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "property:set",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "name",
+      "path",
+      "type",
+      "value"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "random",
+    "domain": "files_folders",
+    "params": [
+      "folder"
+    ],
+    "flags": [
+      "newtab",
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "random:read",
+    "domain": "files_folders",
+    "params": [
+      "folder"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "read",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "unique",
+    "domain": "files_folders",
+    "params": [
+      "content",
+      "name",
+      "paneType"
+    ],
+    "flags": [
+      "silent"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "wordcount",
+    "domain": "files_folders",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "characters",
+      "words"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "backlinks",
+    "domain": "links",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "counts",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "deadends",
+    "domain": "links",
+    "params": [],
+    "flags": [
+      "all",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "links",
+    "domain": "links",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "orphans",
+    "domain": "links",
+    "params": [],
+    "flags": [
+      "all",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "unresolved",
+    "domain": "links",
+    "params": [],
+    "flags": [
+      "counts",
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin",
+    "domain": "plugins",
+    "params": [
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin:disable",
+    "domain": "plugins",
+    "params": [
+      "filter",
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin:enable",
+    "domain": "plugins",
+    "params": [
+      "filter",
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin:install",
+    "domain": "plugins",
+    "params": [
+      "id"
+    ],
+    "flags": [
+      "enable"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin:reload",
+    "domain": "plugins",
+    "params": [
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugin:uninstall",
+    "domain": "plugins",
+    "params": [
+      "id"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugins",
+    "domain": "plugins",
+    "params": [
+      "filter"
+    ],
+    "flags": [
+      "versions"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugins:enabled",
+    "domain": "plugins",
+    "params": [
+      "filter"
+    ],
+    "flags": [
+      "versions"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "plugins:restrict",
+    "domain": "plugins",
+    "params": [],
+    "flags": [
+      "off",
+      "on"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:add",
+    "domain": "publish",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "changed"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:list",
+    "domain": "publish",
+    "params": [],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:open",
+    "domain": "publish",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:remove",
+    "domain": "publish",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:site",
+    "domain": "publish",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "publish:status",
+    "domain": "publish",
+    "params": [],
+    "flags": [
+      "changed",
+      "deleted",
+      "new",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "search",
+    "domain": "search",
+    "params": [
+      "format",
+      "limit",
+      "path",
+      "query"
+    ],
+    "flags": [
+      "case",
+      "matches",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "search:open",
+    "domain": "search",
+    "params": [
+      "query"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync",
+    "domain": "sync",
+    "params": [],
+    "flags": [
+      "off",
+      "on"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:deleted",
+    "domain": "sync",
+    "params": [],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:history",
+    "domain": "sync",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:open",
+    "domain": "sync",
+    "params": [
+      "file",
+      "path"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:read",
+    "domain": "sync",
+    "params": [
+      "file",
+      "path",
+      "version"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:restore",
+    "domain": "sync",
+    "params": [
+      "file",
+      "path",
+      "version"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "sync:status",
+    "domain": "sync",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "tag",
+    "domain": "tags",
+    "params": [
+      "name"
+    ],
+    "flags": [
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "tags",
+    "domain": "tags",
+    "params": [
+      "file",
+      "path",
+      "sort"
+    ],
+    "flags": [
+      "all",
+      "counts",
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "task",
+    "domain": "tasks",
+    "params": [
+      "file",
+      "line",
+      "path",
+      "ref",
+      "status"
+    ],
+    "flags": [
+      "daily",
+      "done",
+      "task",
+      "todo",
+      "toggle"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "tasks",
+    "domain": "tasks",
+    "params": [
+      "file",
+      "path",
+      "status"
+    ],
+    "flags": [
+      "all",
+      "daily",
+      "done",
+      "todo",
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "template:insert",
+    "domain": "templates",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "template:read",
+    "domain": "templates",
+    "params": [
+      "name",
+      "title"
+    ],
+    "flags": [
+      "resolve"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "templates",
+    "domain": "templates",
+    "params": [],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "snippet:disable",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "snippet:enable",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "snippets",
+    "domain": "themes_snippets",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "snippets:enabled",
+    "domain": "themes_snippets",
+    "params": [],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "theme",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "theme:install",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [
+      "enable"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "theme:set",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "theme:uninstall",
+    "domain": "themes_snippets",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "themes",
+    "domain": "themes_snippets",
+    "params": [],
+    "flags": [
+      "versions"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "recents",
+    "domain": "workspace",
+    "params": [],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "tab:open",
+    "domain": "workspace",
+    "params": [
+      "file",
+      "group",
+      "view"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "tabs",
+    "domain": "workspace",
+    "params": [],
+    "flags": [
+      "ids"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "vault",
+    "domain": "workspace",
+    "params": [
+      "info"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "vault:open",
+    "domain": "workspace",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "tui-only behavior documented",
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "vaults",
+    "domain": "workspace",
+    "params": [],
+    "flags": [
+      "total",
+      "verbose"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "desktop-only behavior documented",
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "web",
+    "domain": "workspace",
+    "params": [
+      "url"
+    ],
+    "flags": [
+      "newtab"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "workspace",
+    "domain": "workspace",
+    "params": [],
+    "flags": [
+      "ids"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "workspace:delete",
+    "domain": "workspace",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "workspace:load",
+    "domain": "workspace",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "workspace:save",
+    "domain": "workspace",
+    "params": [
+      "name"
+    ],
+    "flags": [],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  },
+  {
+    "command": "workspaces",
+    "domain": "workspace",
+    "params": [],
+    "flags": [
+      "total"
+    ],
+    "requires_desktop": true,
+    "requires_catalyst": true,
+    "stability_level": "early-access",
+    "notes": [
+      "Source: https://help.obsidian.md/cli (raw publish markdown)."
+    ]
+  }
+]

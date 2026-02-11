@@ -1,0 +1,218 @@
+[
+  {
+    "brainos_flow": "plugin_dev_cycle",
+    "candidate_command": "plugin:reload",
+    "use_mode": "developer-automation",
+    "guardrail_risk": "low",
+    "value_score": 5,
+    "decision": "Go MVP"
+  },
+  {
+    "brainos_flow": "plugin_dev_cycle",
+    "candidate_command": "dev:screenshot",
+    "use_mode": "developer-automation",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go MVP"
+  },
+  {
+    "brainos_flow": "plugin_dev_cycle",
+    "candidate_command": "dev:console",
+    "use_mode": "developer-automation",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go MVP"
+  },
+  {
+    "brainos_flow": "plugin_dev_cycle",
+    "candidate_command": "dev:errors",
+    "use_mode": "developer-automation",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go MVP"
+  },
+  {
+    "brainos_flow": "plugin_dev_cycle",
+    "candidate_command": "eval",
+    "use_mode": "developer-automation",
+    "guardrail_risk": "medium",
+    "value_score": 3,
+    "decision": "Hold"
+  },
+  {
+    "brainos_flow": "flow_a_current_note_review",
+    "candidate_command": "read",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_a_current_note_review",
+    "candidate_command": "diff",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_a_current_note_review",
+    "candidate_command": "history:list",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_a_current_note_review",
+    "candidate_command": "append",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "high",
+    "value_score": 3,
+    "decision": "Hold"
+  },
+  {
+    "brainos_flow": "flow_a_current_note_review",
+    "candidate_command": "prepend",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "high",
+    "value_score": 3,
+    "decision": "Hold"
+  },
+  {
+    "brainos_flow": "flow_b_inbox_batch",
+    "candidate_command": "files",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_b_inbox_batch",
+    "candidate_command": "tasks",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_b_inbox_batch",
+    "candidate_command": "search",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "flow_b_inbox_batch",
+    "candidate_command": "move",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "high",
+    "value_score": 4,
+    "decision": "Hold"
+  },
+  {
+    "brainos_flow": "flow_b_inbox_batch",
+    "candidate_command": "delete",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "critical",
+    "value_score": 2,
+    "decision": "No-go"
+  },
+  {
+    "brainos_flow": "daily_capture_loop",
+    "candidate_command": "daily",
+    "use_mode": "orchestration",
+    "guardrail_risk": "low",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "daily_capture_loop",
+    "candidate_command": "daily:append",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "medium",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "daily_capture_loop",
+    "candidate_command": "daily:prepend",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "medium",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "daily_capture_loop",
+    "candidate_command": "tags",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "daily_capture_loop",
+    "candidate_command": "task",
+    "use_mode": "write-with-explicit-confirmation",
+    "guardrail_risk": "medium",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "workspace_orchestration",
+    "candidate_command": "workspace",
+    "use_mode": "orchestration",
+    "guardrail_risk": "low",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "workspace_orchestration",
+    "candidate_command": "tab:open",
+    "use_mode": "orchestration",
+    "guardrail_risk": "low",
+    "value_score": 3,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "workspace_orchestration",
+    "candidate_command": "recents",
+    "use_mode": "orchestration",
+    "guardrail_risk": "low",
+    "value_score": 2,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "command_bridge",
+    "candidate_command": "commands",
+    "use_mode": "orchestration",
+    "guardrail_risk": "medium",
+    "value_score": 4,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "command_bridge",
+    "candidate_command": "command",
+    "use_mode": "orchestration",
+    "guardrail_risk": "medium",
+    "value_score": 5,
+    "decision": "Go post-MVP"
+  },
+  {
+    "brainos_flow": "runtime_ops",
+    "candidate_command": "sync:status",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 2,
+    "decision": "Hold"
+  },
+  {
+    "brainos_flow": "runtime_ops",
+    "candidate_command": "vault",
+    "use_mode": "read-only-assist",
+    "guardrail_risk": "low",
+    "value_score": 2,
+    "decision": "Hold"
+  }
+]

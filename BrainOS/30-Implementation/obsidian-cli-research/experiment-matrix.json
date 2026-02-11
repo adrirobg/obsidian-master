@@ -1,0 +1,158 @@
+[
+  {
+    "candidate": "I01 plugin-reload automation",
+    "scenario": "mvp-dev-lane",
+    "preconditions": "Catalyst-enabled Obsidian 1.12+, CLI registered, plugin build output ready",
+    "steps": [
+      "Run plugin build",
+      "Execute obsidian plugin:reload id=<brainos-plugin-id>",
+      "Verify plugin reload success in dev console"
+    ],
+    "expected_result": "Reload occurs without manual toggle and no runtime errors are introduced",
+    "fallback": "Manual plugin disable/enable in UI",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I02 dev screenshot runner",
+    "scenario": "mvp-dev-lane",
+    "preconditions": "Catalyst-enabled CLI, deterministic workspace layout",
+    "steps": [
+      "Open target view",
+      "Run obsidian dev:screenshot path=<file.png>",
+      "Compare image baseline"
+    ],
+    "expected_result": "Valid PNG artifact generated and visual diff is stable",
+    "fallback": "Manual screenshot capture",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I03 dev errors capture",
+    "scenario": "mvp-dev-lane",
+    "preconditions": "Catalyst-enabled CLI, reproducible test scenario",
+    "steps": [
+      "Run scenario",
+      "Run obsidian dev:errors",
+      "Parse and store errors in report"
+    ],
+    "expected_result": "Error buffer is retrievable and actionable",
+    "fallback": "Inspect errors manually in Electron devtools",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I04 dev console capture",
+    "scenario": "mvp-dev-lane",
+    "preconditions": "Catalyst-enabled CLI",
+    "steps": [
+      "Run obsidian dev:console limit=100",
+      "Filter by level=error|warn",
+      "Attach output to QA report"
+    ],
+    "expected_result": "Structured console capture integrated into validation report",
+    "fallback": "Manual console copy",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I07 read-only review bundle",
+    "scenario": "flow-a-read-only",
+    "preconditions": "Catalyst-enabled CLI or simulated command contract",
+    "steps": [
+      "Run obsidian read path=<current-note>",
+      "Run obsidian diff path=<current-note> from=1",
+      "Run obsidian history:list path=<current-note>"
+    ],
+    "expected_result": "Review context can be built without mutating notes",
+    "fallback": "Use Vault API in plugin for read-only context",
+    "status": "planned-no-catalyst-simulation"
+  },
+  {
+    "candidate": "I09 inbox triage scanner",
+    "scenario": "flow-b-candidate-selection",
+    "preconditions": "Catalyst-enabled CLI or simulated outputs",
+    "steps": [
+      "Run obsidian files folder=00-Inbox",
+      "Run obsidian search query=<triage query>",
+      "Run obsidian tasks path=<candidate-note>"
+    ],
+    "expected_result": "Top-N candidate set generated without auto-write",
+    "fallback": "Use existing plugin folder scan and task parsing",
+    "status": "planned-no-catalyst-simulation"
+  },
+  {
+    "candidate": "I13 daily append helper",
+    "scenario": "daily-capture-assisted",
+    "preconditions": "Catalyst-enabled CLI, explicit user confirmation step",
+    "steps": [
+      "Prepare content preview",
+      "Request explicit user approval",
+      "Run obsidian daily:append content=<text>"
+    ],
+    "expected_result": "Content is appended only after explicit approval",
+    "fallback": "Manual append in editor",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I15 workspace preset loading",
+    "scenario": "workspace-orchestration",
+    "preconditions": "Catalyst-enabled CLI, pre-saved workspace",
+    "steps": [
+      "Run obsidian workspaces",
+      "Run obsidian workspace:load name=<workspace>",
+      "Verify expected tabs and panes"
+    ],
+    "expected_result": "Review workspace can be restored quickly",
+    "fallback": "Manual workspace selection",
+    "status": "planned-with-catalyst"
+  },
+  {
+    "candidate": "I05 command bridge",
+    "scenario": "plugin-command-orchestration",
+    "preconditions": "Catalyst-enabled CLI, stable plugin command IDs",
+    "steps": [
+      "Run obsidian commands filter=<plugin-id>",
+      "Run obsidian command id=<plugin-command-id>",
+      "Observe side effects and logs"
+    ],
+    "expected_result": "CLI can trigger BrainOS plugin command predictably",
+    "fallback": "Invoke command from command palette",
+    "status": "deferred-hold"
+  },
+  {
+    "candidate": "I22 controlled create draft",
+    "scenario": "write-path-guardrail",
+    "preconditions": "Catalyst-enabled CLI, explicit approval UX and audit logging",
+    "steps": [
+      "Show preview and target path",
+      "Collect explicit approval",
+      "Run obsidian create path=<target> content=<draft> silent"
+    ],
+    "expected_result": "Write occurs only after approval and is audit logged",
+    "fallback": "Manual note creation by user",
+    "status": "deferred-hold"
+  },
+  {
+    "candidate": "I23 controlled move",
+    "scenario": "write-path-guardrail",
+    "preconditions": "Catalyst-enabled CLI, explicit approval UX and rollback path",
+    "steps": [
+      "Show source and destination preview",
+      "Collect explicit approval",
+      "Run obsidian move path=<src> to=<dst>"
+    ],
+    "expected_result": "Move is explicit and reversible",
+    "fallback": "Manual drag-and-drop in Obsidian",
+    "status": "deferred-hold"
+  },
+  {
+    "candidate": "I24 automated delete",
+    "scenario": "guardrail-violation-check",
+    "preconditions": "N/A",
+    "steps": [
+      "Do not execute automatic delete path",
+      "Record policy violation",
+      "Reject candidate"
+    ],
+    "expected_result": "Automated delete remains disabled",
+    "fallback": "None required",
+    "status": "rejected-no-go"
+  }
+]
