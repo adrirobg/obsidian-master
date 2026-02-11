@@ -32,3 +32,17 @@ test('SSE parser emits default message event and adapter classifies it as messag
 	assert.equal(normalized.category, 'message');
 	assert.equal(normalized.sessionId, 'session-1');
 });
+
+test('SSE parser ignores id-only frames without data', () => {
+	const events = [];
+	const parser = new SseParser({
+		onEvent: (event) => {
+			events.push(event);
+		}
+	});
+
+	parser.feed('id: evt-123\n\n');
+	parser.flush();
+
+	assert.equal(events.length, 0);
+});

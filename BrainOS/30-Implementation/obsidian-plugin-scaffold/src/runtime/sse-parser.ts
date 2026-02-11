@@ -127,10 +127,7 @@ export class SseParser {
 
 	private dispatchEvent(): void {
 		const hasData = this.currentEvent.data.length > 0;
-		const hasName = this.currentEvent.event.length > 0;
-		const hasId = this.currentEvent.id.length > 0;
-
-		if (!hasData && !hasName && !hasId) {
+		if (!hasData) {
 			this.currentEvent = this.createEmptyEvent();
 			return;
 		}

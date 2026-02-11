@@ -9,9 +9,10 @@ Usar junto con:
 
 ## A) Preflight tecnico
 
-- [ ] En rama correcta: `codex/issue-22-validation-release-readiness`
-- [ ] Rama alineada con `origin/codex/issue-flow-plugin-runtime` (ff-only)
-- [ ] Preflight worker OK:
+- [ ] En rama valida para ejecucion: rama del issue (pre-merge) o rama de integracion objetivo (post-merge, por ejemplo `main`).
+- [ ] Rama sincronizada con su target (`git fetch --all --prune` + update segun flujo: ff-only/rebase/merge).
+- [ ] Arbol de trabajo limpio antes de validar (`git status` sin conflictos ni cambios no relacionados).
+- [ ] Preflight worker OK (si existe `.codex-issue-context.md`):
   `bash scripts/preflight_worker_issue_dev_pr.sh .codex-issue-context.md`
 
 ## B) Baseline automatica
