@@ -1,0 +1,14 @@
+# Local orchestration artifacts
+.codex-orchestrator/
+worktrees/
+**/.codex-issue-context.md
+
+# Local planning/docs generated during orchestration
+BrainOS/30-Implementation/NEXT-BLOCK-EXECUTION-CHECKLIST.md
+BrainOS/30-Implementation/NEXT-BLOCK-PLUGIN-RUNTIME-PLAN.md
+
+# Local launch helper
+scripts/launch_codex_swarm.sh
+
+# macOS noise
+.DS_Store
