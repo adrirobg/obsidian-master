@@ -1,8 +1,11 @@
-/*
+.brainos-review-preview {
+	width: 100%;
+	font-family: var(--font-monospace);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.brainos-review-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 12px;
+}

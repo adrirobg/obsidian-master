@@ -29,5 +29,7 @@ export {
 	type SessionMetadata,
 	type SessionStateManagerOptions,
 	type SessionStateSnapshot,
+	type SuggestionDecision,
+	type SuggestionDecisionRecord,
 	type SuggestionStatus
 } from './session-state-manager';

@@ -8,6 +8,7 @@ export interface SessionMessage {
 }
 
 export type SuggestionStatus = 'pending' | 'shown' | 'accepted' | 'rejected';
+export type SuggestionDecision = 'accepted' | 'rejected';
 
 export interface PendingSuggestion {
 	id: string;
@@ -15,6 +16,15 @@ export interface PendingSuggestion {
 	payload: string;
 	status: SuggestionStatus;
 	createdAt: number;
+}
+
+export interface SuggestionDecisionRecord {
+	id: string;
+	suggestionId: string;
+	notePath: string;
+	decision: SuggestionDecision;
+	decidedAt: number;
+	sessionId: string | null;
 }
 
 export interface SessionMetadata {
@@ -28,17 +38,20 @@ export interface SessionStateSnapshot {
 	metadata: SessionMetadata;
 	history: SessionMessage[];
 	pendingSuggestions: PendingSuggestion[];
+	decisionLog: SuggestionDecisionRecord[];
 }
 
 export interface SessionStateManagerOptions {
 	maxHistory?: number;
 	maxPendingSuggestions?: number;
+	maxDecisionLog?: number;
 	ttlMs?: number | null;
 }
 
 const DEFAULT_LIMITS = Object.freeze({
 	maxHistory: 10,
 	maxPendingSuggestions: 25,
+	maxDecisionLog: 100,
 	ttlMs: null as number | null
 });
 
@@ -63,7 +76,8 @@ function cloneSnapshot(state: SessionStateSnapshot): SessionStateSnapshot {
 	return {
 		metadata: { ...state.metadata },
 		history: state.history.map((message) => ({ ...message })),
-		pendingSuggestions: state.pendingSuggestions.map((suggestion) => ({ ...suggestion }))
+		pendingSuggestions: state.pendingSuggestions.map((suggestion) => ({ ...suggestion })),
+		decisionLog: state.decisionLog.map((decision) => ({ ...decision }))
 	};
 }
 
@@ -77,6 +91,7 @@ export class SessionStateManager {
 	private readonly limits: {
 		maxHistory: number;
 		maxPendingSuggestions: number;
+		maxDecisionLog: number;
 		ttlMs: number | null;
 	};
 
@@ -87,6 +102,7 @@ export class SessionStateManager {
 		this.limits = {
 			maxHistory: normalizeLimit(options.maxHistory, DEFAULT_LIMITS.maxHistory),
 			maxPendingSuggestions: normalizeLimit(options.maxPendingSuggestions, DEFAULT_LIMITS.maxPendingSuggestions),
+			maxDecisionLog: normalizeLimit(options.maxDecisionLog, DEFAULT_LIMITS.maxDecisionLog),
 			ttlMs: normalizeTtl(options.ttlMs)
 		};
 		this.state = this.createDefaultState();
@@ -151,6 +167,20 @@ export class SessionStateManager {
 		return true;
 	}
 
+	registerDecision(record: Omit<SuggestionDecisionRecord, 'sessionId'>, now = Date.now()): void {
+		const normalized: SuggestionDecisionRecord = {
+			id: String(record.id),
+			suggestionId: String(record.suggestionId),
+			notePath: String(record.notePath),
+			decision: record.decision,
+			decidedAt: Number.isFinite(record.decidedAt) ? record.decidedAt : now,
+			sessionId: this.state.metadata.sessionId
+		};
+		this.state.decisionLog.push(normalized);
+		trimToLimit(this.state.decisionLog, this.limits.maxDecisionLog);
+		this.touch(now);
+	}
+
 	registerCleanupHook(hook: () => void): void {
 		this.cleanupHooks.push(hook);
 	}
@@ -195,7 +225,8 @@ export class SessionStateManager {
 				expiresAt: null
 			},
 			history: [],
-			pendingSuggestions: []
+			pendingSuggestions: [],
+			decisionLog: []
 		};
 	}
 
