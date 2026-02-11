@@ -1,0 +1,11 @@
+.brainos-review-preview {
+	width: 100%;
+	font-family: var(--font-monospace);
+}
+
+.brainos-review-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 12px;
+}
