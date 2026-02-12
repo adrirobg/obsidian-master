@@ -51,6 +51,7 @@ Use these skills as the default operating system:
 ## Branch and Merge Policy
 - Set `--base-branch` explicitly when generating swarm plans. Do not assume `main`.
 - Use deterministic worker branches (`<prefix>/issue-XX-...`).
+- Use `codex/research/<tema>` for research branches.
 - Ensure current worker branch matches the branch declared in context.
 - For sequential flow, only advance queue after merge into queue `base_branch` (or issue `merge_target`).
 
