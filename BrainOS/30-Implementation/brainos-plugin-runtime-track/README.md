@@ -11,6 +11,6 @@ metodologico del agente.
 
 ## Proxima referencia
 
-- `BrainOS/30-Implementation/NEXT-PHASE-BRAINOS-METHODOLOGICAL-PLAN.md`
-- `BrainOS/30-Implementation/ARCHIVER-CONTRACT-v1.md`
-- `BrainOS/30-Implementation/OPENCODE-AGENT-CONFIG-v1.md`
+- `BrainOS/30-Implementation/brainos-plugin-runtime-track/NEXT-PHASE-BRAINOS-METHODOLOGICAL-PLAN.md`
+- `BrainOS/30-Implementation/brainos-plugin-runtime-track/ARCHIVER-CONTRACT-v1.md`
+- `BrainOS/30-Implementation/brainos-plugin-runtime-track/OPENCODE-AGENT-CONFIG-v1.md`
